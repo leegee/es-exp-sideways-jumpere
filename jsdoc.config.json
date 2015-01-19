@@ -1,0 +1,26 @@
+{
+    "tags": {
+        "allowUnknownTags"	: true
+    },
+    "source": {
+        "includePattern"	: ".+\\.js(doc)?$",
+        "excludePattern"	: ".*?vendor.*?"
+    },
+    "plugins": [],
+
+    "templates": {
+        "theme"           	: "flatly",
+        "default": {
+            "outputSourceFiles": true
+        },
+        "cleverLinks"	  	: false,
+        "monospaceLinks"  	: false,
+        "systemName"      	: "The System",
+        "footer"          	: "",
+        "copyright"       	: "",
+        "navType"         	: "vertical",
+        "linenums"        	: true,
+        "collapseSymbols" 	: false,
+        "inverseNav"      	: true
+    },
+}

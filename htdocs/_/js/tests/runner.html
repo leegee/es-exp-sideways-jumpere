@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta charset="utf-8">
+		<title>Mocha Test Suite Runner</title>
+
+		<link rel="stylesheet" media="all" href="vendor/mocha/mocha.css">
+        <script src="vendor/mocha/mocha.js"></script>
+
+		<script src='../vendor/require.js'></script>
+        <script>
+			/** The tests themselves */
+			var TEST_SPECS = [
+				'examples/simple.js',
+				'examples/ajax.js'
+			];
+
+            /** Needed to run the tests */
+            var TEST_LIBS = [
+                'vendor/chai/chai.js',
+                'vendor/should/should.js'
+            ];
+
+            /** @global */
+			var TEST_RUNNER = {};
+			TEST_RUNNER.html_fixture_selector = '#fixture-holder';
+
+            /** @global */
+            window.require_base_url = '../';
+			require(['../require-global-config.js'], function(){
+                console.info('Loaded require-global-config.js');
+				require( TEST_LIBS, function () {
+                    console.info('Loaded test libs, ', TEST_LIBS);
+					mocha.setup('bdd');
+					require( TEST_SPECS, function (m){
+                        console.info('Loaded test specs: ', TEST_SPECS);
+						mocha.run();
+                        console.log("Called mocha.run");
+					});
+				});
+			});
+		</script>
+
+	</head>
+	<body>
+		<header>
+			<h1>Mocha Tests</h1>
+			<p>Add tests to this file's <code>TEST_SPECS</code>.</p>
+		</header>
+		<section id="mocha" data-comment="Report gets inserted into here"></section>
+		<div id="fixture-holder"></div>
+	</body>
+</html>
+
+

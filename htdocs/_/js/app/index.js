@@ -1,16 +1,21 @@
 define( [
-    'modernizer', 'jquery', 'app/Land', 'app/Game'
+    'modernizer', 'jquery',
+    'app/Game',
+    'app/Land',
+    'app/Player'
 ],
 function (
-    _, jquery, Land, Game
+    _, jquery, Game, Land, Player
 ) {
     jquery(document).ready( function () {
         jquery('body').html('');
-        var land = new Land();
+        jquery(document.body).css({
+            overflow: 'hidden'
+        })
         var game = new Game({
-            land: land
+            Land: Land,
+            Player: Player
         });
-        land.onReady( game, game.run );
     });
 });
 

@@ -95,9 +95,23 @@ textarea {
 
 
 
+#land,
+#player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    margin: 0;
+}
 
+#land {
+    z-index: 0;
+}
 
-
+#player {
+    z-index: 50;
+    background: transparent;
+}
 
 
 

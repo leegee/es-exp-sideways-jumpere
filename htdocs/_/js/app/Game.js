@@ -14,11 +14,36 @@ define(['jquery'], function (jquery) {
     })();
 
     var Game = function (args) {
-        console.group('Game.constructor enter ', arguments);
-        this.land = args.land;
-        this.playing = false;
+        console.debug('Game.constructor enter ', arguments);
+        this.init(args);
+    };
+
+    Game.prototype.init = function (args) {
+        console.group('Game.init enter ', arguments);
+        var self = this;
         this.pageX = 0;
         this.pageY = 0;
+        self.playing = false;
+
+        this.land   = new args.Land();
+        this.player = new args.Player();
+
+        // this.land.onReady( this, this.run );
+        this.land.load().then(
+            function () {
+                console.log('Loaded Land');
+                self.run();
+            }
+        )
+        .then(
+            this.player.load().then(
+                function () {
+                    self.playing = true;
+                    console.log('Loaded player');
+                }
+            )
+        );
+
         console.groupEnd();
     };
 
@@ -44,9 +69,14 @@ define(['jquery'], function (jquery) {
     Game.prototype.setInputListeners = function () {
         console.debug('Enter setInputListeners');
         var self = this;
+
+        // Prevent cursor keys from moving the page:
+        document.onkeypress = function handleKeyPress (event) {
+            return false;
+        };
+
         // Via http://stackoverflow.com/questions/7790725/javascript-track-mouse-position
-        document.onmousemove = handleMouseMove;
-        function handleMouseMove (event) {
+        document.onmousemove = function handleMouseMove (event) {
             var dot, eventDoc, doc, body, pageX, pageY;
 
             event = event || window.event; // IE-ism
@@ -70,7 +100,7 @@ define(['jquery'], function (jquery) {
             // Use event.pageX / event.pageY here
             self.pageX = event.pageX;
             self.pageY = event.pageY;
-        }
+        };
     };
 
     Game.prototype.removeInputListeners = function () {
@@ -94,18 +124,35 @@ define(['jquery'], function (jquery) {
             moveX = 0;
         }
 
-        if (this.pageY <= this.land.sides.top){
-            moveY = 1;
-        }
-        else if (this.pageY >= this.land.sides.bottom){
-            moveY = -1;
-        }
-        else {
-            moveY = 0;
-        }
+        // Y movement is only by gravity
+        // if (this.pageY <= this.land.sides.top){
+        //     moveY = 1;
+        // } else if (this.pageY >= this.land.sides.bottom){
+        //     moveY = -1;
+        // } else {
+        //     moveY = 0;
+        // }
 
         this.land.moveBy( moveX, moveY );
         this.land.render();
+
+        if (! this.land.scrolled.x){
+            // console.log('no scroll x')
+        }
+        if (! this.land.scrolled.y){
+            // console.log('no scroll y')
+        }
+
+        this.applyGravity();
+        this.collisionDetection();
+
+        this.player.render();
+    };
+
+    Game.prototype.applyGravity = function () {
+    };
+
+    Game.prototype.collisionDetection = function () {
     };
 
     return Game;

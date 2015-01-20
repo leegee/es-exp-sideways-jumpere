@@ -73,6 +73,11 @@ define(['jquery'], function (jquery) {
         console.debug('Enter setInputListeners');
         var self = this;
 
+        document.onmousedown = function handleMouseDown (event) {
+            console.log('click');
+            self.startJump();
+        };
+
         // Prevent cursor keys from moving the page:
         document.onkeypress = function handleKeyPress (event) {
             return false;
@@ -155,6 +160,7 @@ define(['jquery'], function (jquery) {
     };
 
     Game.prototype.collisionDetection_and_gravity = function () {
+        // Falling?
         var imgd = this.land.ctx.getImageData(
             (parseInt( this.land.el.css('left') ) * -1) + this.player.x - this.player.offset.x,
             (parseInt( this.land.el.css('top' ) ) * -1) + this.player.y + this.player.offset.y,
@@ -184,9 +190,12 @@ define(['jquery'], function (jquery) {
 
         // Fall if  the pixels below player are 'clear'
         if (clearUnder >= imgd.data.length/4){
-            this.moveY -= 1;
-        } else {
+            this.moveY -= 4;
+            this.player.falling = true;
+        }
+        else {
             this.moveY = 0;
+            this.player.falling = false;
         }
 
         // Fall left/right if only half ground beneath
@@ -237,6 +246,29 @@ define(['jquery'], function (jquery) {
                 console.log('OK to moveX ', this.moveX);
             }
         }
+
+        if (this.player.jumpStartTime){
+            var duration = new Date().getTime() - this.player.jumpStartTime;
+            if (duration > 2000){
+                this.player.jumpStartTime = 0;
+            }
+            else {
+                var velocity = 100 - duration/10;
+                if (velocity < 0){
+                    velocity = 0;
+                }
+                this.moveY = velocity/10;
+                console.log(velocity);
+            }
+        }
+    };
+
+    Game.prototype.startJump = function () {
+        if (this.player.jumping || this.player.falling) {
+            return;
+        }
+
+        this.player.jumpStartTime = new Date().getTime();
     };
 
     return Game;

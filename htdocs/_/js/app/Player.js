@@ -4,10 +4,15 @@ define(['jquery'], function (jquery) {
 
     var Player = function (args) {
         console.debug('Player.constructor enter ', arguments);
-        var self = this;
-        this.world = args.world;
-        this.jumpStartTime = 0;
-        this.falling = false;
+        var self             = this;
+        this.world           = args.world;
+        this.jumpStartTime   = 0;
+        this.falling         = false;
+        this.mining          = false;
+        this.x               = null;
+        this.y               = null;
+        this.img             = null;
+        this.ctx             = null;
         this.scale = {
             x: 1,
             y: 1
@@ -16,9 +21,6 @@ define(['jquery'], function (jquery) {
             x: null,
             y: null
         };
-        this.x = this.y = null;
-        this.img = null;
-        this.ctx = null;
     };
 
     Player.prototype.load = function () {

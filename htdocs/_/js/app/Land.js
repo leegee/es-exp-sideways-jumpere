@@ -17,6 +17,8 @@ define(['jquery'], function (jquery) {
             top:    null,
             bottom: null
         };
+        this.mineSquare = 20;
+        this.mineSquareHalf = this.mineSquare / 2;
         this.scale = {
             x: 1,
             y: 1
@@ -49,6 +51,13 @@ define(['jquery'], function (jquery) {
                     self.img.width,
                     self.img.height
                 );
+
+                self.blankSpace = self.ctx.createImageData(1,1);
+                self.blankSpace.data[0] = 1;
+                self.blankSpace.data[1] = 2;
+                self.blankSpace.data[2] = 255;
+                self.blankSpace.data[3] = 255;
+                // data = [255,255,255,255];
 
                 self.sides.left = parseInt(
                     window.innerWidth / 3
@@ -112,7 +121,18 @@ define(['jquery'], function (jquery) {
             left: x,
             top:  y
         });
-        // console.debug('Rendered Land.img at %d,%d of x %d', x, y, this.img.width*-1);
+    };
+
+    Land.prototype.mine = function (x, y) {
+        // this.ctx.putImageData( this.blankSpace,
+        //     Math.abs(this.x) + x,
+        //     Math.abs(this.y) + y
+        // );
+        this.ctx.clearRect(
+            Math.abs(this.x) + x - this.mineSquareHalf,
+            Math.abs(this.y) + y - this.mineSquareHalf,
+            this.mineSquare, this.mineSquare
+        );
     };
 
     return Land;

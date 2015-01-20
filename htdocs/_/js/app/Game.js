@@ -73,46 +73,65 @@ define(['jquery'], function (jquery) {
         console.debug('Enter setInputListeners');
         var self = this;
 
-        document.onmousedown = function handleMouseDown (event) {
-            console.log('click');
-            self.startJump();
+        document.onmousedown = function handleMouseDown (e) {
+            e = e || window.e;
+            e.preventDefault() || e.stopPropagation();
+            if (e.which===1 || e.button==1){
+                self.startJump();
+            } else {
+                self.startMining();
+            }
+            return false;
         };
 
-        // Prevent cursor keys from moving the page:
-        document.onkeypress = function handleKeyPress (event) {
+        document.oncontextmenu = function handleContextMenu (e) {
+            e = e || window.e;
+            e.preventDefault() || e.stopPropagation();
+            return false;
+        };
+
+        // Pre cursor keys from moving the page:
+        document.onkeypress = function handleKeyPress (e) {
+            e = e || window.e;
+            e.preventDefault() || e.stopPropagation();
             return false;
         };
 
         // Via http://stackoverflow.com/questions/7790725/javascript-track-mouse-position
-        document.onmousemove = function handleMouseMove (event) {
-            var dot, eventDoc, doc, body, pageX, pageY;
-
-            event = event || window.event; // IE-ism
+        document.onmousemove = function handleMouseMove (e) {
+            var dot, eDoc, doc, body, pageX, pageY;
+            e = e || window.e; // IE-ism
+            e.preventDefault() || e.stopPropagation();
 
             // If pageX/Y aren't available and clientX/Y are,
             // calculate pageX/Y - logic taken from jQuery.
             // (This is to support old IE)
-            if (event.pageX == null && event.clientX != null) {
-                eventDoc = (event.target && event.target.ownerDocument) || document;
-                doc = eventDoc.documentElement;
-                body = eventDoc.body;
+            if (e.pageX == null && e.clientX != null) {
+                eDoc = (e.target && e.target.ownerDocument) || document;
+                doc = eDoc.documentElement;
+                body = eDoc.body;
 
-                event.pageX = event.clientX +
+                e.pageX = e.clientX +
                   (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
                   (doc && doc.clientLeft || body && body.clientLeft || 0);
-                event.pageY = event.clientY +
+                e.pageY = e.clientY +
                   (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
                   (doc && doc.clientTop  || body && body.clientTop  || 0 );
             }
 
-            // Use event.pageX / event.pageY here
-            self.pageX = event.pageX;
-            self.pageY = event.pageY;
+            // Use e.pageX / e.pageY here
+            self.pageX = e.pageX;
+            self.pageY = e.pageY;
+
+            return false;
         };
     };
 
     Game.prototype.removeInputListeners = function () {
-        document.onmousemove = null;
+        document.onmousemove   = null;
+        document.onkeypress    = null;
+        document.onmousedown   = null;
+        document.onContextMenu = null;
     }
 
     Game.prototype.tick = function (args) {
@@ -214,7 +233,7 @@ define(['jquery'], function (jquery) {
             }
         }
 
-        // Prevent moving left/right into things
+        // Pre moving left/right into things
         else if (this.moveX !== 0){
             var xOffset = this.player.offset.x;
             if (this.moveX > 0){
@@ -264,11 +283,39 @@ define(['jquery'], function (jquery) {
     };
 
     Game.prototype.startJump = function () {
-        if (this.player.jumping || this.player.falling) {
+        if (this.player.jumpStartTime || this.player.falling) {
             return;
         }
-
         this.player.jumpStartTime = new Date().getTime();
+    };
+
+    Game.prototype.startMining = function () {
+        if (this.player.mining) return false;
+        this.player.mining = true;
+
+        var mineX = 0;
+        if (this.pageX >= this.player.x + this.player.offset.x){
+            mineX = this.player.x + this.player.offset.x;
+        }
+        else if (this.pageX <= this.player.x - this.player.offset.x){
+            mineX = this.player.x - this.player.offset.x;
+        }
+
+        var mineY = 0;
+        if (this.pageY >= this.player.y + this.player.offset.y){
+            mineY = this.player.y + this.player.offset.y;
+        }
+        else if (this.pageY <= this.player.y - this.player.offset.y){
+            mineY = this.player.y - this.player.offset.y;
+        }
+
+        this.land.mine( mineX, mineY );
+
+        // Allow more mining in a little while:
+        var self = this;
+        setTimeout( function () {
+            self.player.mining = false;
+        }, 300);
     };
 
     return Game;

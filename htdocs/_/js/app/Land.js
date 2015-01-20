@@ -1,6 +1,6 @@
 'use strict';
 
-define(['jquery', 'box2d'], function (jquery, Box2d) {
+define(['jquery'], function (jquery) {
 
 /*  An image on a canvas.
     The canvas is moved by CSS, the canvas is editable.
@@ -17,10 +17,6 @@ define(['jquery', 'box2d'], function (jquery, Box2d) {
             top:    null,
             bottom: null
         };
-        this.offset = {
-                x: 0,
-                y: 0
-            };
         this.scale = {
             x: 1,
             y: 1
@@ -33,7 +29,7 @@ define(['jquery', 'box2d'], function (jquery, Box2d) {
         var self = this;
 
         this.img = new Image();
-        this.img.src = '/img/passmore.png';
+        this.img.src = '/img/passmore-fg.png';
 
         return new Promise ( function (resolve, reject) {
             self.img.onload = function() {
@@ -49,6 +45,10 @@ define(['jquery', 'box2d'], function (jquery, Box2d) {
 
                 self.ctx = self.el.get(0).getContext('2d');
                 self.ctx.drawImage( self.img, 0, 0 );
+                self.imageData = self.ctx.createImageData(
+                    self.img.width,
+                    self.img.height
+                );
 
                 self.sides.left = parseInt(
                     window.innerWidth / 3
@@ -87,14 +87,16 @@ define(['jquery', 'box2d'], function (jquery, Box2d) {
         if (this.x < window.innerWidth - this.img.width) {
             this.x -= mx;
             this.scrolled.x = false;
+            console.debug('Not moving X > width ',mx);
         }
         else if (this.x > 0) {
             this.x = 0;
             this.scrolled.x = false;
+            console.debug('Not moving X > 0 ',mx);
         }
 
         if (this.y < window.innerHeight - this.img.height) {
-            this.y =- - my;
+            this.y = window.innerHeight - this.img.height;
             this.scrolled.y = false;
         }
         else if (this.y > 0) {
@@ -104,13 +106,13 @@ define(['jquery', 'box2d'], function (jquery, Box2d) {
     };
 
     Land.prototype.render = function () {
-        var x = parseInt( this.x + this.offset.x ) + 'px';
-        var y = parseInt( this.y + this.offset.y) + 'px';
+        var x = parseInt( this.x ) + 'px';
+        var y = parseInt( this.y ) + 'px';
         this.el.css({
             left: x,
             top:  y
         });
-        console.debug('Rendered Land.img at %d,%d of x %d', x, y, this.img.width*-1);
+        // console.debug('Rendered Land.img at %d,%d of x %d', x, y, this.img.width*-1);
     };
 
     return Land;

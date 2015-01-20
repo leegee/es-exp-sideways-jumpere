@@ -1,7 +1,6 @@
 'use strict';
 
 define(['jquery'], function (jquery) {
-
     window.requestAnimFrame = (function(){
         return  window.requestAnimationFrame       ||
               window.webkitRequestAnimationFrame ||
@@ -15,18 +14,22 @@ define(['jquery'], function (jquery) {
 
     var Game = function (args) {
         console.debug('Game.constructor enter ', arguments);
+        args.gravity = args.gravity || 10;
+
         this.init(args);
     };
 
     Game.prototype.init = function (args) {
         console.group('Game.init enter ', arguments);
         var self = this;
-        this.pageX = 0;
-        this.pageY = 0;
+        this.pageX = null;
+        this.pageY = null;
         self.playing = false;
 
         this.land   = new args.Land();
-        this.player = new args.Player();
+        this.player = new args.Player({
+            world: this.world
+        });
 
         // this.land.onReady( this, this.run );
         this.land.load().then(
@@ -112,19 +115,22 @@ define(['jquery'], function (jquery) {
     };
 
     Game.prototype.render = function (args) {
-        var moveX, moveY;
+        this.moveX = 0;
+        this.moveY = 0;
 
-        if (this.pageX >= this.land.sides.right){
-            moveX = -1;
-        }
-        else if (this.pageX <= this.land.sides.left){
-            moveX = 1;
-        }
-        else {
-            moveX = 0;
+        // Mouse moves background
+        if (this.pageX){
+            if (this.pageX >= this.land.sides.right){
+                this.moveX = -1;
+                console.debug('Mouse moves x -1');
+            }
+            else if (this.pageX <= this.land.sides.left){
+                this.moveX = 1;
+                console.debug('Mouse moves x 1 as %d <= %d', this.pageX, this.land.sides.left);
+            }
         }
 
-        // Y movement is only by gravity
+        // Y movement is only by gravity/jump
         // if (this.pageY <= this.land.sides.top){
         //     moveY = 1;
         // } else if (this.pageY >= this.land.sides.bottom){
@@ -133,7 +139,9 @@ define(['jquery'], function (jquery) {
         //     moveY = 0;
         // }
 
-        this.land.moveBy( moveX, moveY );
+        this.collisionDetection_and_gravity();
+
+        this.land.moveBy( this.moveX, this.moveY );
         this.land.render();
 
         if (! this.land.scrolled.x){
@@ -143,16 +151,92 @@ define(['jquery'], function (jquery) {
             // console.log('no scroll y')
         }
 
-        this.applyGravity();
-        this.collisionDetection();
-
         this.player.render();
     };
 
-    Game.prototype.applyGravity = function () {
-    };
+    Game.prototype.collisionDetection_and_gravity = function () {
+        var imgd = this.land.ctx.getImageData(
+            (parseInt( this.land.el.css('left') ) * -1) + this.player.x - this.player.offset.x,
+            (parseInt( this.land.el.css('top' ) ) * -1) + this.player.y + this.player.offset.y,
+            this.player.img.width,
+            this.player.scale.y
+        );
 
-    Game.prototype.collisionDetection = function () {
+        var x=0, clearUnder=0, clearUnderLeft=0, clearUnderRight=0;
+        for (var i=0; i < imgd.data.length; i += 4){
+            var r = imgd.data[i],
+                g = imgd.data[i+1],
+                b = imgd.data[i+2],
+                a = imgd.data[i+3];
+            if (a < 127){
+                clearUnder++;
+                if (x < this.player.offset.x){
+                    clearUnderLeft ++;
+                } else {
+                    clearUnderRight ++;
+                }
+            }
+            x ++;
+            if (x > this.player.width){
+                x = 0;
+            }
+        }
+
+        // Fall if  the pixels below player are 'clear'
+        if (clearUnder >= imgd.data.length/4){
+            this.moveY -= 1;
+        } else {
+            this.moveY = 0;
+        }
+
+        // Fall left/right if only half ground beneath
+        if (clearUnder >= imgd.data.length/8
+         && clearUnderLeft !== clearUnderRight
+        ){
+            if (clearUnderLeft && clearUnderLeft > clearUnderRight){
+                this.moveX += 1;
+                this.moveY -= 1;
+                console.debug('fall moves x 1');
+            }
+            else if (clearUnderRight && clearUnderRight > clearUnderLeft){
+                this.moveX -= 1;
+                this.moveY -= 1;
+                console.debug('fall moves x -1');
+            }
+        }
+
+        // Prevent moving left/right into things
+        else if (this.moveX !== 0){
+            var xOffset = this.player.offset.x;
+            if (this.moveX > 0){
+                xOffset *= -1;
+            }
+            var imgd = this.land.ctx.getImageData(
+                (parseInt( this.land.el.css('left') ) * -1) + this.player.x + xOffset,
+                (parseInt( this.land.el.css('top' ) ) * -1) + this.player.y - this.player.offset.y,
+                this.player.scale.x,
+                this.player.img.height
+            );
+
+            var clear = 0;
+            for (var i=0; i < imgd.data.length; i += 4){
+                var r = imgd.data[i],
+                    g = imgd.data[i+1],
+                    b = imgd.data[i+2],
+                    a = imgd.data[i+3];
+                if (a < 127){
+                    clear++;
+                }
+            }
+            // 50% clear
+            if ( clear < imgd.data.length/8) {
+                this.moveX = 0;
+                console.debug('do not move x as clear = %d / %d', clear, imgd.data.length/8);
+            }
+            else {
+                console.log('OK to moveX ', this.moveX);
+            }
+        }
     };
 
     return Game;

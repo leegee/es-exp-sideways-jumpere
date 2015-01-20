@@ -34,6 +34,11 @@
             'jquery-ui-i18n'    : 'vendor/jquery-ui-i18n',
             modernizer          : 'vendor/modernizr-2.8.0.min',
             box2d               : 'vendor/bower_components/box2d.js/box2d'
+        },
+        shim: {
+            box2d: {
+                exports: 'Box2D'
+            }
         }
     });
 

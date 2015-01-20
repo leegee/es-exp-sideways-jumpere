@@ -5,13 +5,14 @@ define(['jquery'], function (jquery) {
     var Player = function (args) {
         console.debug('Player.constructor enter ', arguments);
         var self = this;
+        this.world = args.world;
         this.scale = {
             x: 1,
             y: 1
         };
         this.offset = {
-            x: 0,
-            y: 0
+            x: null,
+            y: null
         };
         this.x = this.y = null;
         this.img = null;
@@ -28,6 +29,12 @@ define(['jquery'], function (jquery) {
                 console.debug('Loaded Player.img');
                 self.x = parseInt( (window.innerWidth/2) - (self.img.width/2) );
                 self.y = parseInt( (window.innerHeight/2) - (self.img.height/2) );
+
+                self.offset = {
+                    x: self.img.width  / 2,
+                    y: self.img.height / 2
+                };
+
                 self.el = jquery(
                     '<canvas id="player" '
                     +'width="'+window.innerWidth+'" '
@@ -48,7 +55,10 @@ define(['jquery'], function (jquery) {
 
     Player.prototype.moveBy = function (x, y) {
         if (!x && !y) return;
-        return;
+        x = x || this.moving.x;
+        y = y || this.moving.y;
+        this.moving.x = x;
+        this.moving.y = y;
         this.scrolled = {
             x: true,
             y: true
@@ -78,8 +88,8 @@ define(['jquery'], function (jquery) {
 
     Player.prototype.render = function () {
         this.ctx.drawImage( this.img,
-            parseInt( this.x + this.offset.x ),
-            parseInt( this.y + this.offset.y)
+            parseInt( this.x - this.offset.x ),
+            parseInt( this.y - this.offset.y)
         );
     };
 

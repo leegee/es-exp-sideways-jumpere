@@ -96,12 +96,12 @@ define(['jquery'], function (jquery) {
         if (this.x < window.innerWidth - this.img.width) {
             this.x -= mx;
             this.scrolled.x = false;
-            console.debug('Not moving X > width ',mx);
+            // console.debug('Not moving X > width ',mx);
         }
         else if (this.x > 0) {
             this.x = 0;
             this.scrolled.x = false;
-            console.debug('Not moving X > 0 ',mx);
+            // console.debug('Not moving X > 0 ',mx);
         }
 
         if (this.y < window.innerHeight - this.img.height) {

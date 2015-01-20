@@ -7,7 +7,7 @@ define(['jquery'], function (jquery) {
         var self             = this;
         this.world           = args.world;
         this.jumpStartTime   = 0;
-        this.falling         = false;
+        this.fallStartTime   = 0;
         this.mining          = false;
         this.x               = null;
         this.y               = null;

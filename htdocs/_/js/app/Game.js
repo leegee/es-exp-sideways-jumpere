@@ -1,16 +1,36 @@
 'use strict';
 
 define(['jquery'], function (jquery) {
-    window.requestAnimFrame = (function(){
-        return  window.requestAnimationFrame       ||
-              window.webkitRequestAnimationFrame ||
-              window.mozRequestAnimationFrame    ||
-              window.oRequestAnimationFrame      ||
-              window.msRequestAnimationFrame     ||
-              function( callback ){
-                window.setTimeout(callback, 1000 / 60);
-              };
-    })();
+    // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+    // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+
+    // requestAnimationFrame polyfill by Erik Möller
+    // fixes from Paul Irish and Tino Zijdel
+
+    (function() {
+        var lastTime = 0;
+        var vendors = ['ms', 'moz', 'webkit', 'o'];
+        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+            window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+            window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame']
+                                       || window[vendors[x]+'CancelRequestAnimationFrame'];
+        }
+
+        if (!window.requestAnimationFrame)
+            window.requestAnimationFrame = function(callback, element) {
+                var currTime = new Date().getTime();
+                var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+                  timeToCall);
+                lastTime = currTime + timeToCall;
+                return id;
+            };
+
+        if (!window.cancelAnimationFrame)
+            window.cancelAnimationFrame = function(id) {
+                clearTimeout(id);
+            };
+    }());
 
     var Game = function (args) {
         console.debug('Game.constructor enter ', arguments);
@@ -57,9 +77,9 @@ define(['jquery'], function (jquery) {
         self.playing = true;
 
         // Schedule rendering:
-        (function animGame () {
+        (function animationLoop () {
             if (self.playing){
-                requestAnimFrame(animGame);
+                requestAnimationFrame(animationLoop);
                 self.tick();
             }
         })();
@@ -209,12 +229,18 @@ define(['jquery'], function (jquery) {
 
         // Fall if  the pixels below player are 'clear'
         if (clearUnder >= imgd.data.length/4){
-            this.moveY -= 4;
-            this.player.falling = true;
+            // this.moveY -= 4;
+            if (! this.player.fallStartTime){
+                this.player.fallStartTime = new Date().getTime();
+            }
+            var duration = new Date().getTime() - this.player.fallStartTime;
+            // Increase velocity
+            this.moveY = -1 * (1 + (parseInt(duration/200)*2));
         }
+
         else {
             this.moveY = 0;
-            this.player.falling = false;
+            this.player.fallStartTime = 0;
         }
 
         // Fall left/right if only half ground beneath
@@ -224,12 +250,10 @@ define(['jquery'], function (jquery) {
             if (clearUnderLeft && clearUnderLeft > clearUnderRight){
                 this.moveX += 1;
                 this.moveY -= 1;
-                console.debug('fall moves x 1');
             }
             else if (clearUnderRight && clearUnderRight > clearUnderLeft){
                 this.moveX -= 1;
                 this.moveY -= 1;
-                console.debug('fall moves x -1');
             }
         }
 
@@ -259,31 +283,23 @@ define(['jquery'], function (jquery) {
             // 50% clear
             if ( clear < imgd.data.length/8) {
                 this.moveX = 0;
-                console.debug('do not move x as clear = %d / %d', clear, imgd.data.length/8);
-            }
-            else {
-                console.log('OK to moveX ', this.moveX);
             }
         }
 
         if (this.player.jumpStartTime){
             var duration = new Date().getTime() - this.player.jumpStartTime;
-            if (duration > 2000){
+            if (duration > 700){
                 this.player.jumpStartTime = 0;
             }
             else {
-                var velocity = 100 - duration/10;
-                if (velocity < 0){
-                    velocity = 0;
-                }
-                this.moveY = velocity/10;
-                console.log(velocity);
+                // decrease velocity
+                this.moveY = (100 - duration/10) / 5;
             }
         }
     };
 
     Game.prototype.startJump = function () {
-        if (this.player.jumpStartTime || this.player.falling) {
+        if (this.player.jumpStartTime || this.player.fallStartTime) {
             return;
         }
         this.player.jumpStartTime = new Date().getTime();

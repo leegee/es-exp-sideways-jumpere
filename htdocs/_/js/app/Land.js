@@ -128,11 +128,23 @@ define(['jquery'], function (jquery) {
         //     Math.abs(this.x) + x,
         //     Math.abs(this.y) + y
         // );
-        this.ctx.clearRect(
+
+        // this.ctx.clearRect(
+        //     Math.abs(this.x) + x - this.mineSquareHalf,
+        //     Math.abs(this.y) + y - this.mineSquareHalf,
+        //     this.mineSquare, this.mineSquare
+        // );
+
+        this.ctx.globalCompositeOperation = 'destination-out';
+        this.ctx.beginPath();
+        this.ctx.arc(
             Math.abs(this.x) + x - this.mineSquareHalf,
             Math.abs(this.y) + y - this.mineSquareHalf,
-            this.mineSquare, this.mineSquare
+            this.mineSquare,
+            0, Math.PI*2, false
         );
+        this.ctx.closePath();
+        this.ctx.fill();
     };
 
     return Land;

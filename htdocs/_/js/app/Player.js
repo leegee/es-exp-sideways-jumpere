@@ -13,10 +13,6 @@ define(['jquery'], function (jquery) {
         this.y               = null;
         this.img             = null;
         this.ctx             = null;
-        this.scale = {
-            x: 1,
-            y: 1
-        };
         this.offset = {
             x: null,
             y: null
@@ -67,27 +63,8 @@ define(['jquery'], function (jquery) {
             x: true,
             y: true
         };
-        var mx = this.scale.x * x;
-        var my = this.scale.y * y;
-        this.x = parseInt( this.x + mx );
-        this.y = parseInt( this.y + my );
-
-        // if (this.x < this.img.width * -1) {
-        //     this.x = this.img.width * -1;
-        //     this.scrolled.x = false;
-        // }
-        // else if (this.x > 0) {
-        //     this.x = 0;
-        //     this.scrolled.x = false;
-        // }
-        // if (this.y < this.img.height * -1) {
-        //     this.y = this.img.height * -1;
-        //     this.scrolled.y = false;
-        // }
-        // else if (this.y > 0) {
-        //     this.y = 0;
-        //     this.scrolled.y = false;
-        // }
+        this.x = parseInt( this.x + x );
+        this.y = parseInt( this.y + y );
     };
 
     Player.prototype.render = function () {

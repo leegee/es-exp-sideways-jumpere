@@ -11,6 +11,7 @@ define(['jquery'], function (jquery) {
         var self    = this;
         this.ready  = false;
         this.el     = null;
+        this.dom    = null;
         this.sides = {
             left:   null,
             right:  null,
@@ -44,20 +45,9 @@ define(['jquery'], function (jquery) {
                     +'"/>'
                 );
                 jquery( document.body ).append( self.el );
-
-                self.ctx = self.el.get(0).getContext('2d');
+                self.dom = self.el.get(0);
+                self.ctx = self.dom.getContext('2d');
                 self.ctx.drawImage( self.img, 0, 0 );
-                self.imageData = self.ctx.createImageData(
-                    self.img.width,
-                    self.img.height
-                );
-
-                self.blankSpace = self.ctx.createImageData(1,1);
-                self.blankSpace.data[0] = 1;
-                self.blankSpace.data[1] = 2;
-                self.blankSpace.data[2] = 255;
-                self.blankSpace.data[3] = 255;
-                // data = [255,255,255,255];
 
                 self.sides.left = parseInt(
                     window.innerWidth / 3
@@ -65,28 +55,21 @@ define(['jquery'], function (jquery) {
                 self.sides.right = parseInt(
                     window.innerWidth - ( window.innerWidth / 3 )
                 );
-                self.sides.top = parseInt(
-                    window.innerHeight / 3
-                );
-                self.sides.bottom = parseInt(
-                    window.innerHeight - ( window.innerHeight / 3 )
-                );
-                self.render();
+
                 resolve();
-                // reject( new Error('er'))
             };
         });
     };
 
     Land.prototype.moveBy = function (x, y) {
+        this.scrolled = { x: false, y: false };
+
         if (!x && !y) return;
 
         x = x || 0;
         y = y || 0;
-        this.scrolled = {
-            x: true,
-            y: true
-        };
+
+        this.scrolled = { x: true, y: true };
 
         var mx = this.scale.x * x,
             my = this.scale.y * y;
@@ -96,12 +79,10 @@ define(['jquery'], function (jquery) {
         if (this.x < window.innerWidth - this.img.width) {
             this.x -= mx;
             this.scrolled.x = false;
-            // console.debug('Not moving X > width ',mx);
         }
         else if (this.x > 0) {
             this.x = 0;
             this.scrolled.x = false;
-            // console.debug('Not moving X > 0 ',mx);
         }
 
         if (this.y < window.innerHeight - this.img.height) {
@@ -112,39 +93,27 @@ define(['jquery'], function (jquery) {
             this.y = 0;
             this.scrolled.y = false;
         }
-    };
 
-    Land.prototype.render = function () {
-        var x = parseInt( this.x ) + 'px';
-        var y = parseInt( this.y ) + 'px';
-        this.el.css({
-            left: x,
-            top:  y
-        });
+        this.dom.style.transform="translate("+this.x+"px,"+this.y+"px)";
     };
 
     Land.prototype.mine = function (x, y) {
-        // this.ctx.putImageData( this.blankSpace,
-        //     Math.abs(this.x) + x,
-        //     Math.abs(this.y) + y
-        // );
-
-        // this.ctx.clearRect(
-        //     Math.abs(this.x) + x - this.mineSquareHalf,
-        //     Math.abs(this.y) + y - this.mineSquareHalf,
-        //     this.mineSquare, this.mineSquare
-        // );
-
-        this.ctx.globalCompositeOperation = 'destination-out';
-        this.ctx.beginPath();
-        this.ctx.arc(
+        this.ctx.clearRect(
             Math.abs(this.x) + x - this.mineSquareHalf,
             Math.abs(this.y) + y - this.mineSquareHalf,
-            this.mineSquare,
-            0, Math.PI*2, false
+            this.mineSquare, this.mineSquare
         );
-        this.ctx.closePath();
-        this.ctx.fill();
+
+        // this.ctx.globalCompositeOperation = 'destination-out';
+        // this.ctx.beginPath();
+        // this.ctx.arc(
+        //     Math.abs(this.x) + x - this.mineSquareHalf,
+        //     Math.abs(this.y) + y - this.mineSquareHalf,
+        //     this.mineSquare,
+        //     0, Math.PI*2, false
+        // );
+        // this.ctx.closePath();
+        // this.ctx.fill();
     };
 
     return Land;

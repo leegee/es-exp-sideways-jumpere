@@ -7,10 +7,12 @@ define(['jquery'], function (jquery) {
         var self             = this;
         this.world           = args.world;
         this.jumpStartTime   = 0;
-        this.fallStartTime   = 0;
+        this.falling         = false;
         this.mining          = false;
         this.x               = null;
         this.y               = null;
+        this.width           = null;
+        this.height          = null;
         this.img             = null;
         this.ctx             = null;
         this.offset = {
@@ -29,7 +31,8 @@ define(['jquery'], function (jquery) {
                 console.debug('Loaded Player.img');
                 self.x = parseInt( (window.innerWidth/2) - (self.img.width/2) );
                 self.y = parseInt( (window.innerHeight/2) - (self.img.height/2) );
-
+                self.width = self.img.width;
+                self.height = self.img.height;
                 self.offset = {
                     x: self.img.width  / 2,
                     y: self.img.height / 2
@@ -72,6 +75,23 @@ define(['jquery'], function (jquery) {
             parseInt( this.x - this.offset.x ),
             parseInt( this.y - this.offset.y)
         );
+    };
+
+    Player.prototype.startJump = function () {
+        if (this.jumpStartTime !== 0 || this.falling) {
+            return;
+        }
+        var self = this;
+        this.jumpStartTime = setTimeout(
+            function () { self.stopJump() },
+            777
+        );
+        this.falling = false;
+    };
+
+    Player.prototype.stopJump = function () {
+        this.jumpStartTime = 0;
+        console.log("Stop jumping");
     };
 
     return Player;

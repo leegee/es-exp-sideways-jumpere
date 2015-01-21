@@ -116,5 +116,54 @@ define(['jquery'], function (jquery) {
         // this.ctx.fill();
     };
 
+    Land.prototype.getClearMatrix = function (x,y, w,h){
+        x = (this.x * -1) + x;
+        y = (this.y * -1) + y;
+        var rv = [ [false,false,false], [false,false,false], [false,false,false] ];
+        var halfW = w/2;
+        var halfH = h/2;
+        var thirdW = w/3;
+        var thirdH = h/3;
+        var imgd = this.ctx.getImageData( x, y, w, h );
+        var imgd8 = new Uint8Array( imgd.data.buffer );
+
+        // Check only transparent pixels
+        var px = 0;
+        for (var i=3; i < imgd8.length; i+=4){
+            // var x = (px % w);
+            // var y = parseInt(px / w);
+            // checks several pixels next to each other :(
+            var x = parseInt( (px % w) / thirdW );
+            var y = parseInt( (px / w) / thirdH );
+            if (imgd8[i] < 127){
+                rv[x][y] = true;
+            }
+            px ++;
+        }
+
+        return rv;
+    }
+
+    Land.prototype.isClear = function (x,y, w,h){
+        x = (this.x * -1) + x;
+        y = (this.y * -1) + y;
+        var imgd = this.ctx.getImageData( x, y, w, h );
+        var imgd8 = new Uint8Array( imgd.data.buffer );
+        var clear = 0;
+        var shouldBeClear = imgd8.length/8;
+
+        // Check only transparent pixels
+        var px = 0;
+        for (var i=3; i < imgd8.length; i+=4){
+            if (imgd8[i] < 127){
+                clear ++;
+                if (clear === shouldBeClear) break;
+            }
+            px ++;
+        }
+
+        return clear === shouldBeClear; // Clear if 50% clear
+    }
+
     return Land;
 });

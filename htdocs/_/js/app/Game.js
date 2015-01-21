@@ -106,7 +106,7 @@ define(['jquery'], function (jquery) {
             e = e || window.e;
             e.preventDefault() || e.stopPropagation();
             if (e.which===1 || e.button==1){
-                self.startJump();
+                self.player.startJump();
             } else {
                 self.startMining();
             }
@@ -164,27 +164,85 @@ define(['jquery'], function (jquery) {
     }
 
     Game.prototype.tick = function (args) {
-        // this.moveX = 0;
-        // this.moveY = 0;
-
-        // Mouse moves background
-        if (this.pageX){
-            if (this.pageX >= this.land.sides.right){
-                this.moveX = -1;
-            }
-            else if (this.pageX <= this.land.sides.left){
-                this.moveX = 1;
-            }
-            else {
-                this.moveX = 0;
-            }
-        }
-
+        this.setMove();
         this.collisionDetection_and_gravity();
         this.land.moveBy( this.moveX, this.moveY );
     };
 
+    Game.prototype.setMove = function () {
+        // this.moveX = 0;
+        // this.moveY = 0;
+
+        // Mouse moves background
+        if (this.pageX >= this.land.sides.right){
+            this.moveX = -1;
+        }
+        else if (this.pageX <= this.land.sides.left){
+            this.moveX = 1;
+        }
+        else {
+            this.moveX = 0;
+        }
+
+        if (this.player.jumpStartTime){
+            // this.moveY = (100 - duration/10) / 5;
+            this.moveY = -1;
+        }
+    };
+
     Game.prototype.collisionDetection_and_gravity = function () {
+        if (! this.player.jumpStartTime){
+            var clrBelow = this.land.isClear(
+                this.player.x - this.player.offset.x,
+                this.player.y + this.player.offset.y,
+                this.player.width,
+                1
+            );
+            if (clrBelow){
+                this.moveY = -1;
+                if (! this.player.falling){
+                    this.player.falling = true;
+                }
+            } else {
+                this.moveY = 0;
+                this.player.falling = 0;
+            }
+        }
+
+        // Jumping
+        else {
+            var clrAbove = this.land.isClear(
+                this.player.x - this.player.offset.x,
+                this.player.y - this.player.offset.y,
+                this.player.width,
+                1
+            );
+            if (clrAbove){
+                this.moveY = 1;
+            } else {
+                this.moveY = 0;
+                this.player.stopJump();
+            }
+        }
+
+        // Sideways
+        if (this.moveX){
+            var x = this.player.x + (this.player.offset.x+1 * this.moveX);
+            var y = this.player.y-2;
+            // this.player.ctx.fillStyle = 'rgba(255,0,0,.5)';
+            // this.player.ctx.fillRect( x, y, 2,2 );
+            var clrBeside = this.land.isClear(
+                x, y,
+                2,
+                4
+            );
+            if (! clrBeside){
+                this.moveX = 0;
+            }
+        }
+    };
+
+    Game.prototype.collisionDetection_and_gravity1 = function () {
         // Need to fall?
         var imgd = this.land.ctx.getImageData(
             (this.land.x * -1) + this.player.x - this.player.offset.x,
@@ -212,10 +270,10 @@ define(['jquery'], function (jquery) {
         if (clearUnderLeft || clearUnderLeft
             || clearUnder >= imgd.data.length/4
         ){
-            if (! this.player.fallStartTime){
-                this.player.fallStartTime = new Date().getTime();
+            if (! this.player.falling){
+                this.player.falling = new Date().getTime();
             }
-            // var duration = new Date().getTime() - this.player.fallStartTime;
+            // var duration = new Date().getTime() - this.player.falling;
             // Increase velocity
             // this.moveY = -1 * (1 + (parseInt(duration/200)*2));
             // We could safely jump our own height without checking
@@ -231,7 +289,7 @@ define(['jquery'], function (jquery) {
 
         else {
             this.moveY = 0;
-            this.player.fallStartTime = 0;
+            this.player.falling = 0;
         }
 
         // Prevent moving left/right into things
@@ -275,13 +333,6 @@ define(['jquery'], function (jquery) {
                 this.moveY = 1;
             }
         }
-    };
-
-    Game.prototype.startJump = function () {
-        if (this.player.jumpStartTime !== 0 || this.player.fallStartTime !== 0) {
-            return;
-        }
-        this.player.jumpStartTime = new Date().getTime();
     };
 
     Game.prototype.startMining = function () {

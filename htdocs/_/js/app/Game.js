@@ -166,11 +166,9 @@ define(['jquery'], function (jquery) {
         if (this.pageX){
             if (this.pageX >= this.land.sides.right){
                 this.moveX = -1;
-                console.debug('Mouse moves x -1');
             }
             else if (this.pageX <= this.land.sides.left){
                 this.moveX = 1;
-                console.debug('Mouse moves x 1 as %d <= %d', this.pageX, this.land.sides.left);
             }
         }
 
@@ -188,32 +186,29 @@ define(['jquery'], function (jquery) {
         this.land.moveBy( this.moveX, this.moveY );
         this.land.render();
 
-        if (! this.land.scrolled.x){
-            // console.log('no scroll x')
-        }
-        if (! this.land.scrolled.y){
-            // console.log('no scroll y')
-        }
+        // if (! this.land.scrolled.x){
+        //     // console.log('no scroll x')
+        // }
+        // if (! this.land.scrolled.y){
+        //     // console.log('no scroll y')
+        // }
 
         this.player.render();
     };
 
     Game.prototype.collisionDetection_and_gravity = function () {
-        // Falling?
+        // Need to fall?
         var imgd = this.land.ctx.getImageData(
             (parseInt( this.land.el.css('left') ) * -1) + this.player.x - this.player.offset.x,
             (parseInt( this.land.el.css('top' ) ) * -1) + this.player.y + this.player.offset.y,
             this.player.img.width,
-            this.player.scale.y
+            1
         );
-
+        var imgd8 = new Uint8Array( imgd.data.buffer );
         var x=0, clearUnder=0, clearUnderLeft=0, clearUnderRight=0;
-        for (var i=0; i < imgd.data.length; i += 4){
-            var r = imgd.data[i],
-                g = imgd.data[i+1],
-                b = imgd.data[i+2],
-                a = imgd.data[i+3];
-            if (a < 127){
+        // Check transparent pixels
+        for (var i=3; i < imgd8.length; i+=4){
+            if (imgd8[i] < 127){
                 clearUnder++;
                 if (x < this.player.offset.x){
                     clearUnderLeft ++;
@@ -221,15 +216,16 @@ define(['jquery'], function (jquery) {
                     clearUnderRight ++;
                 }
             }
-            x ++;
-            if (x > this.player.width){
-                x = 0;
-            }
+            x = x > this.player.width? 0 : x+1;
         }
 
         // Fall if  the pixels below player are 'clear'
-        if (clearUnder >= imgd.data.length/4){
-            // this.moveY -= 4;
+        if (clearUnder >= imgd.data.length/4
+            || (
+                clearUnderLeft || clearUnderLeft
+                && clearUnderLeft !== clearUnderRight
+            )
+        ){
             if (! this.player.fallStartTime){
                 this.player.fallStartTime = new Date().getTime();
             }
@@ -244,21 +240,19 @@ define(['jquery'], function (jquery) {
         }
 
         // Fall left/right if only half ground beneath
-        if (clearUnder >= imgd.data.length/8
-         && clearUnderLeft !== clearUnderRight
+        if (clearUnderLeft || clearUnderLeft
+            && clearUnderLeft !== clearUnderRight
         ){
-            if (clearUnderLeft && clearUnderLeft > clearUnderRight){
+            if (clearUnderLeft > clearUnderRight){
                 this.moveX += 1;
-                this.moveY -= 1;
             }
-            else if (clearUnderRight && clearUnderRight > clearUnderLeft){
+            else {
                 this.moveX -= 1;
-                this.moveY -= 1;
             }
         }
 
-        // Pre moving left/right into things
-        else if (this.moveX !== 0){
+        // Prevent moving left/right into things
+        if (this.moveX !== 0){
             var xOffset = this.player.offset.x;
             if (this.moveX > 0){
                 xOffset *= -1;
@@ -266,23 +260,21 @@ define(['jquery'], function (jquery) {
             var imgd = this.land.ctx.getImageData(
                 (parseInt( this.land.el.css('left') ) * -1) + this.player.x + xOffset,
                 (parseInt( this.land.el.css('top' ) ) * -1) + this.player.y - this.player.offset.y,
-                this.player.scale.x,
+                Math.abs(this.moveX),
                 this.player.img.height
             );
-
+            var imgd8 = new Uint8Array( imgd.data.buffer );
             var clear = 0;
-            for (var i=0; i < imgd.data.length; i += 4){
-                var r = imgd.data[i],
-                    g = imgd.data[i+1],
-                    b = imgd.data[i+2],
-                    a = imgd.data[i+3];
-                if (a < 127){
+            // Check transparent pixels
+            for (var i=3; i < imgd.data.length; i += 4){
+                if (imgd8[i] < 127){
                     clear++;
+                    // 50% clear?
+                    if (clear < imgd.data.length/8) {
+                        this.moveX = 0;
+                        break;
+                    }
                 }
-            }
-            // 50% clear
-            if ( clear < imgd.data.length/8) {
-                this.moveX = 0;
             }
         }
 
@@ -299,7 +291,7 @@ define(['jquery'], function (jquery) {
     };
 
     Game.prototype.startJump = function () {
-        if (this.player.jumpStartTime || this.player.fallStartTime) {
+        if (this.player.jumpStartTime !== 0 || this.player.fallStartTime !== 0) {
             return;
         }
         this.player.jumpStartTime = new Date().getTime();

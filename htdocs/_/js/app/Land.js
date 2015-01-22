@@ -97,12 +97,36 @@ define(['jquery'], function (jquery) {
         this.dom.style.transform="translate("+this.x+"px,"+this.y+"px)";
     };
 
-    Land.prototype.mine = function (x, y) {
-        this.ctx.clearRect(
-            Math.abs(this.x) + x - this.mineSquareHalf -1,
-            Math.abs(this.y) + y - this.mineSquareHalf -1,
-            this.mineSquare, this.mineSquare
+    Land.prototype.mine = function (atX,atY, p2x,p2y) {
+        var angleRad = Math.atan2(atY - p2y, atX - p2x);
+        var mineX = atX + parseInt(
+            (this.mineSquare*-1) * Math.cos( angleRad )
         );
+        var mineY = atY + parseInt(
+            (this.mineSquare*-1) * Math.sin( angleRad )
+        );
+
+        var x = Math.abs(this.x) + mineX - this.mineSquareHalf -1;
+        var y = Math.abs(this.y) + mineY - this.mineSquareHalf -1;
+
+        var imgd = this.ctx.getImageData( x, y, this.mineSquare, this.mineSquare );
+        var imgd8 = new Uint8Array( imgd.data.buffer );
+
+        var r=0, g=0, b=0;
+        for (var i=0; i<imgd8.length; i+=4){
+            r += imgd8[i];
+            g += imgd8[i+1];
+            b += imgd8[i+2];
+        }
+        r /= imgd8.length;
+        g /= imgd8.length;
+        b /= imgd8.length;
+
+        this.ctx.clearRect(
+            x, y, this.mineSquare, this.mineSquare
+        );
+
+        return [r,g,b];
 
         // this.ctx.globalCompositeOperation = 'destination-out';
         // this.ctx.beginPath();

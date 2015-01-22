@@ -33,14 +33,7 @@ define(['jquery'], function (jquery) {
     }());
 
     var Game = function (args) {
-        console.debug('Game.constructor enter ', arguments);
-        args.gravity = args.gravity || 10;
-
-        this.init(args);
-    };
-
-    Game.prototype.init = function (args) {
-        console.group('Game.init enter ', arguments);
+        console.group('Game.constructor enter ', arguments);
         var self = this;
         this.pageX      = null;
         this.pageY      = null;
@@ -51,9 +44,10 @@ define(['jquery'], function (jquery) {
         this.yJumpRate  = 2;
         self.playing    = false;
 
+        this.hud        = new args.Hud();
         this.land       = new args.Land();
         this.player     = new args.Player({
-            world: this.world
+            land: this.land
         });
 
         // this.land.onReady( this, this.run );
@@ -110,8 +104,11 @@ define(['jquery'], function (jquery) {
             e.preventDefault() || e.stopPropagation();
             if (e.which===1 || e.button==1){
                 self.player.startJump();
-            } else {
-                self.startMining();
+            }
+            else {
+                self.hud.addRgb(
+                    self.player.startMining( this.pageX, this.pageY )
+                );
             }
             return false;
         };
@@ -167,101 +164,9 @@ define(['jquery'], function (jquery) {
     }
 
     Game.prototype.tick = function (args) {
-        this.setMove();
-        this.collisionDetection_and_gravity();
-        this.land.moveBy( this.moveX, this.moveY );
-    };
-
-    Game.prototype.setMove = function () {
-        // Mouse moves background
-        if (this.pageX >= this.land.sides.right){
-            this.moveX = this.xMoveRate;
-        }
-        else if (this.pageX <= this.land.sides.left){
-            this.moveX = this.xMoveRate * -1;
-        }
-        else {
-            this.moveX = 0;
-        }
-
-        if (this.player.jumpStartTime){
-            // this.moveY = (100 - duration/10) / 5;
-            this.moveY = -1 * this.yFallRate;
-        }
-    };
-
-    Game.prototype.collisionDetection_and_gravity = function () {
-        if (! this.player.jumpStartTime){
-            var clrBelow = this.land.isClear(
-                this.player.x - this.player.offset.x,
-                this.player.y + this.player.offset.y,
-                this.player.offset.y,
-                this.yFallRate
-            );
-            if (clrBelow){
-                this.moveY = this.yFallRate;
-                if (! this.player.falling){
-                    this.player.falling = true;
-                }
-            } else {
-                this.moveY = 0;
-                this.player.falling = 0;
-            }
-        }
-
-        // Jumping
-        else {
-            var clrAbove = this.land.isClear(
-                this.player.x - this.player.offset.x,
-                this.player.y - this.player.offset.y,
-                this.player.width,
-                this.yJumpRate
-            );
-            if (clrAbove){
-                this.moveY = this.yJumpRate * -1;
-            } else {
-                this.moveY = 0;
-                this.player.stopJump();
-            }
-        }
-
-        // Sideways
-        if (this.moveX){
-            var x = this.player.x + (this.player.offset.x * this.moveX);
-            var y = this.player.y + (this.player.offset.y * this.moveY);;
-            var clrBeside = this.land.isClear(
-                x, y,
-                this.xMoveRate * this.moveX,
-                4
-            );
-            if (clrBeside){
-                this.moveX = this.xMoveRate * this.moveX;
-            } else {
-                this.moveX = 0;
-            }
-        }
-    };
-
-    Game.prototype.startMining = function () {
-        if (this.player.mining) return false;
-        this.player.mining = true;
-
-        var angleRad = Math.atan2(
-            this.player.y - this.pageY,
-            this.player.x - this.pageX
-        );
-        var mineX = this.player.x + parseInt(
-            (this.land.mineSquare*-1) * Math.cos( angleRad )
-        );
-        var mineY = this.player.y + parseInt(
-            (this.land.mineSquare*-1) * Math.sin( angleRad )
-        );
-        this.land.mine( mineX, mineY );
-        // Allow more mining in a little while:
-        var self = this;
-        setTimeout( function () {
-            self.player.mining = false;
-        }, 300);
+        this.player.setMove( this.pageX, this.pageY );
+        this.player.collisionDetection_and_gravity();
+        this.land.moveBy( this.player.moveX, this.player.moveY );
     };
 
     return Game;

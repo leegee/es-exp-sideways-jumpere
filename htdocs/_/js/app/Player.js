@@ -5,7 +5,7 @@ define(['jquery'], function (jquery) {
     var Player = function (args) {
         console.debug('Player.constructor enter ', arguments);
         var self             = this;
-        this.world           = args.world;
+        this.land           = args.land;
         this.jumpStartTime   = 0;
         this.falling         = false;
         this.mining          = false;
@@ -19,6 +19,12 @@ define(['jquery'], function (jquery) {
             x: null,
             y: null
         };
+
+        this.moveX      = 0;
+        this.moveY      = 0;
+        this.xMoveRate  = 2;
+        this.yFallRate  = 2;
+        this.yJumpRate  = 2;
     };
 
     Player.prototype.load = function () {
@@ -54,6 +60,23 @@ define(['jquery'], function (jquery) {
                 // reject( new Error('er'))
             };
         });
+    };
+
+    Player.prototype.setMove = function (x, y){
+        if (x >= this.land.sides.right){
+            this.moveX = this.xMoveRate;
+        }
+        else if (x <= this.land.sides.left){
+            this.moveX = this.xMoveRate * -1;
+        }
+        else {
+            this.moveX = 0;
+        }
+
+        if (this.jumpStartTime){
+            // this.moveY = (100 - duration/10) / 5;
+            this.moveY = -1 * this.yFallRate;
+        }
     };
 
     Player.prototype.moveBy = function (x, y) {
@@ -92,6 +115,70 @@ define(['jquery'], function (jquery) {
     Player.prototype.stopJump = function () {
         this.jumpStartTime = 0;
         console.log("Stop jumping");
+    };
+
+    Player.prototype.collisionDetection_and_gravity = function () {
+        if (! this.jumpStartTime){
+            var clrBelow = this.land.isClear(
+                this.x - this.offset.x,
+                this.y + this.offset.y,
+                this.offset.y,
+                this.yFallRate
+            );
+            if (clrBelow){
+                this.moveY = this.yFallRate;
+                if (! this.falling){
+                    this.falling = true;
+                }
+            } else {
+                this.moveY = 0;
+                this.falling = 0;
+            }
+        }
+
+        // Jumping
+        else {
+            var clrAbove = this.land.isClear(
+                this.x - this.offset.x,
+                this.y - this.offset.y,
+                this.width,
+                this.yJumpRate
+            );
+            if (clrAbove){
+                this.moveY = this.yJumpRate * -1;
+            } else {
+                this.moveY = 0;
+                this.stopJump();
+            }
+        }
+
+        // Sideways
+        if (this.moveX){
+            var x = this.x + (this.offset.x * this.moveX);
+            var y = this.y + (this.offset.y * this.moveY);;
+            var clrBeside = this.land.isClear(
+                x, y,
+                this.xMoveRate * this.moveX,
+                4
+            );
+            if (clrBeside){
+                this.moveX = this.xMoveRate * this.moveX;
+            } else {
+                this.moveX = 0;
+            }
+        }
+    };
+
+    Player.prototype.startMining = function (x, y) {
+        if (this.mining) return false;
+        this.mining = true;
+        var rgb = this.land.mine( this.x, this.y, x, y );
+        // Allow more mining in a little while:
+        var self = this;
+        setTimeout( function () {
+            self.mining = false;
+        }, 300);
+        return rgb;
     };
 
     return Player;

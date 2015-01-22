@@ -5,27 +5,37 @@ define(['jquery'], function (jquery) {
     var Hud = function (args) {
         console.debug('Hud.constructor enter ', arguments);
         this.rgb = [];
-        this.divisor = 25;
+        this.numberOfColours = 7;
         this.el = jquery('<div id="hud"></div>');
+        this.clrEls = [];
 
-        for (var i=1; i<255/this.divisor; i++){
-
+        var i = 0;
+        for (var hue=0; hue<360; hue+=(360 / this.numberOfColours)){
+            this.clrEls[i] = jquery(
+                '<div id="clr'+i+'" style="color:hsl('
+                + hue
+                + ',80%,70%)"></div>'
+            );
+            this.el.append( this.clrEls[i] );
+            i++;
         }
 
         jquery( document.body ).append( this.el );
     };
 
     Hud.prototype.addRgb = function (rgb) {
-        this.rgb[
-            (rgb[0] / this.divisor)
-            +','
-            + (rgb[1] / this.divisor)
-            +','
-            + (rgb[2] / this.divisor)
-        ];
+        if (rgb !== null && typeof rgb[0] !== 'undefined'){
+            var hsl = this.rgbToHsl(rgb[0], rgb[1], rgb[2]);
+            var hue = parseInt(this.numberOfColours * hsl[0] );
+            var text = this.clrEls[hue].text() || 0;
+            this.clrEls[hue].text(
+                parseInt( text ) + 1
+            );
+        }
     };
 
     /**
+     * Thanks to ...?
      * Converts an RGB color value to HSL. Conversion formula
      * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
      * Assumes r, g, and b are contained in the set [0, 255] and
@@ -41,9 +51,9 @@ define(['jquery'], function (jquery) {
         var max = Math.max(r, g, b), min = Math.min(r, g, b);
         var h, s, l = (max + min) / 2;
 
-        if(max == min){
+        if (max == min){
             h = s = 0; // achromatic
-        }else{
+        } else {
             var d = max - min;
             s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
             switch(max){
@@ -56,5 +66,6 @@ define(['jquery'], function (jquery) {
 
         return [h, s, l];
     }
+
     return Hud;
 });

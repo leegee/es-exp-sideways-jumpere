@@ -37,6 +37,7 @@ define(['jquery'], function (jquery) {
         var self = this;
         this.pageX      = null;
         this.pageY      = null;
+        this.animationId = null;
         this.moveX      = 0;
         this.moveY      = 0;
         this.xMoveRate  = 2;
@@ -85,7 +86,7 @@ define(['jquery'], function (jquery) {
         (function animationLoop () {
             if (self.playing){
                 frames ++;
-                requestAnimationFrame(animationLoop);
+                self.animationId = requestAnimationFrame(animationLoop);
                 self.tick();
             }
         })();
@@ -93,6 +94,7 @@ define(['jquery'], function (jquery) {
 
     Game.prototype.destroy = function () {
         this.removeInputListeners();
+        window.cancelAnimationFrame( this.animationId );
     };
 
     Game.prototype.setInputListeners = function () {
@@ -107,7 +109,7 @@ define(['jquery'], function (jquery) {
             }
             else {
                 self.hud.addRgb(
-                    self.player.startMining( this.pageX, this.pageY )
+                    self.player.startMining( self.pageX, self.pageY )
                 );
             }
             return false;
@@ -161,6 +163,7 @@ define(['jquery'], function (jquery) {
         document.onkeypress    = null;
         document.onmousedown   = null;
         document.onContextMenu = null;
+        this.playing = false;
     }
 
     Game.prototype.tick = function (args) {

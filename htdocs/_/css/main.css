@@ -111,8 +111,27 @@ textarea {
     background: transparent;
 }
 
+#hud {
+    z-index: 100;
+    position: absolute;
+    top: 5%;
+    right: 10%;
+    width: auto;
+    height: auto;
+    padding: 2pt;
+    background: rgba(255,255,255,0.5);
+    border: 2px solid rgba(255,255,255,0.75);
+}
 
-
+#hud div {
+    width: auto;
+    height:100%;
+    display: inline-block;
+    font-size: 24pt;
+    font-family: "Courier New",Courier,Mono;
+    font-weight:bold;
+    margin-left: 1em;
+}
 
 
 

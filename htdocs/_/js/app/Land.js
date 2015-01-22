@@ -10,6 +10,7 @@ define(['jquery'], function (jquery) {
         console.debug('Land.constructor enter ', arguments);
         var self    = this;
         this.ready  = false;
+        this.transparentThreshold = 127;
         this.el     = null;
         this.dom    = null;
         this.sides = {
@@ -18,8 +19,8 @@ define(['jquery'], function (jquery) {
             top:    null,
             bottom: null
         };
-        this.mineSquare = 20;
-        this.mineSquareHalf = this.mineSquare / 2;
+        this.mineSquare     = 12;
+        this.mineSquareHalf = 6;
         this.scale = {
             x: 1,
             y: 1
@@ -111,22 +112,24 @@ define(['jquery'], function (jquery) {
 
         var imgd = this.ctx.getImageData( x, y, this.mineSquare, this.mineSquare );
         var imgd8 = new Uint8Array( imgd.data.buffer );
-
-        var r=0, g=0, b=0;
+        var r=-1, g=-1, b=-1;
         for (var i=0; i<imgd8.length; i+=4){
+            if (imgd8[i+3] < this.transparentThreshold) continue;
             r += imgd8[i];
             g += imgd8[i+1];
             b += imgd8[i+2];
         }
-        r /= imgd8.length;
-        g /= imgd8.length;
-        b /= imgd8.length;
+        if (r>-1){
+            r /= imgd8.length/4;
+            g /= imgd8.length/4;
+            b /= imgd8.length/4;
+        }
 
         this.ctx.clearRect(
             x, y, this.mineSquare, this.mineSquare
         );
 
-        return [r,g,b];
+        return r===-1? null : [r,g,b];
 
         // this.ctx.globalCompositeOperation = 'destination-out';
         // this.ctx.beginPath();

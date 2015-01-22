@@ -114,7 +114,6 @@ define(['jquery'], function (jquery) {
 
     Player.prototype.stopJump = function () {
         this.jumpStartTime = 0;
-        console.log("Stop jumping");
     };
 
     Player.prototype.collisionDetection_and_gravity = function () {

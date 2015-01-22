@@ -83,9 +83,9 @@ define(['jquery'], function (jquery) {
 
         var frames = 0;
         setInterval( function (){
-            console.log('%d fps', frames);
+            console.log('%d fps', frames / 10);
             frames = 0;
-        }, 1000);
+        }, 10000);
 
         // Schedule rendering:
         (function animationLoop () {
@@ -176,11 +176,9 @@ define(['jquery'], function (jquery) {
         // Mouse moves background
         if (this.pageX >= this.land.sides.right){
             this.moveX = this.xMoveRate;
-            console.log('Mouse right');
         }
         else if (this.pageX <= this.land.sides.left){
             this.moveX = this.xMoveRate * -1;
-            console.log('Mouse left');
         }
         else {
             this.moveX = 0;
@@ -229,7 +227,6 @@ define(['jquery'], function (jquery) {
 
         // Sideways
         if (this.moveX){
-            console.log(this.moveX);
             var x = this.player.x + (this.player.offset.x * this.moveX);
             var y = this.player.y + (this.player.offset.y * this.moveY);;
             var clrBeside = this.land.isClear(
@@ -249,24 +246,17 @@ define(['jquery'], function (jquery) {
         if (this.player.mining) return false;
         this.player.mining = true;
 
-        var mineX = 0;
-        if (this.pageX >= this.player.x + this.player.offset.x){
-            mineX = this.player.x + this.player.offset.x;
-        }
-        else if (this.pageX <= this.player.x - this.player.offset.x){
-            mineX = this.player.x - this.player.offset.x;
-        }
-
-        var mineY = 0;
-        if (this.pageY >= this.player.y + this.player.offset.y){
-            mineY = this.player.y + this.player.offset.y;
-        }
-        else if (this.pageY <= this.player.y - this.player.offset.y){
-            mineY = this.player.y - this.player.offset.y;
-        }
-
+        var angleRad = Math.atan2(
+            this.player.y - this.pageY,
+            this.player.x - this.pageX
+        );
+        var mineX = this.player.x + parseInt(
+            (this.land.mineSquare*-1) * Math.cos( angleRad )
+        );
+        var mineY = this.player.y + parseInt(
+            (this.land.mineSquare*-1) * Math.sin( angleRad )
+        );
         this.land.mine( mineX, mineY );
-
         // Allow more mining in a little while:
         var self = this;
         setTimeout( function () {

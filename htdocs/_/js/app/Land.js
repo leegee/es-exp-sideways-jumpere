@@ -99,8 +99,8 @@ define(['jquery'], function (jquery) {
 
     Land.prototype.mine = function (x, y) {
         this.ctx.clearRect(
-            Math.abs(this.x) + x - this.mineSquareHalf,
-            Math.abs(this.y) + y - this.mineSquareHalf,
+            Math.abs(this.x) + x - this.mineSquareHalf -1,
+            Math.abs(this.y) + y - this.mineSquareHalf -1,
             this.mineSquare, this.mineSquare
         );
 

@@ -71,8 +71,8 @@ define(['jquery'], function (jquery) {
 
         this.scrolled = { x: true, y: true };
 
-        var mx = this.scale.x * x,
-            my = this.scale.y * y;
+        var mx = this.scale.x * x * -1,
+            my = this.scale.y * y * -1;
         this.x = parseInt( this.x + mx );
         this.y = parseInt( this.y + my );
 
@@ -130,13 +130,8 @@ define(['jquery'], function (jquery) {
         // Check only transparent pixels
         var px = 0;
         for (var i=3; i < imgd8.length; i+=4){
-            // var x = (px % w);
-            // var y = parseInt(px / w);
-            // checks several pixels next to each other :(
-            var x = parseInt( (px % w) / thirdW );
-            var y = parseInt( (px / w) / thirdH );
             if (imgd8[i] < 127){
-                rv[x][y] = true;
+                rv[ parseInt( (px % w) / thirdW ) ][ parseInt( (px / w) / thirdH ) ] = true;
             }
             px ++;
         }

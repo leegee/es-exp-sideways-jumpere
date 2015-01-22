@@ -42,14 +42,17 @@ define(['jquery'], function (jquery) {
     Game.prototype.init = function (args) {
         console.group('Game.init enter ', arguments);
         var self = this;
-        this.pageX = null;
-        this.pageY = null;
-        this.moveX = 0;
-        this.moveY = 0;
-        self.playing = false;
+        this.pageX      = null;
+        this.pageY      = null;
+        this.moveX      = 0;
+        this.moveY      = 0;
+        this.xMoveRate  = 2;
+        this.yFallRate  = 2;
+        this.yJumpRate  = 2;
+        self.playing    = false;
 
-        this.land   = new args.Land();
-        this.player = new args.Player({
+        this.land       = new args.Land();
+        this.player     = new args.Player({
             world: this.world
         });
 
@@ -170,15 +173,14 @@ define(['jquery'], function (jquery) {
     };
 
     Game.prototype.setMove = function () {
-        // this.moveX = 0;
-        // this.moveY = 0;
-
         // Mouse moves background
         if (this.pageX >= this.land.sides.right){
-            this.moveX = -1;
+            this.moveX = this.xMoveRate;
+            console.log('Mouse right');
         }
         else if (this.pageX <= this.land.sides.left){
-            this.moveX = 1;
+            this.moveX = this.xMoveRate * -1;
+            console.log('Mouse left');
         }
         else {
             this.moveX = 0;
@@ -186,7 +188,7 @@ define(['jquery'], function (jquery) {
 
         if (this.player.jumpStartTime){
             // this.moveY = (100 - duration/10) / 5;
-            this.moveY = -1;
+            this.moveY = -1 * this.yFallRate;
         }
     };
 
@@ -195,11 +197,11 @@ define(['jquery'], function (jquery) {
             var clrBelow = this.land.isClear(
                 this.player.x - this.player.offset.x,
                 this.player.y + this.player.offset.y,
-                this.player.width,
-                1
+                this.player.offset.y,
+                this.yFallRate
             );
             if (clrBelow){
-                this.moveY = -1;
+                this.moveY = this.yFallRate;
                 if (! this.player.falling){
                     this.player.falling = true;
                 }
@@ -215,10 +217,10 @@ define(['jquery'], function (jquery) {
                 this.player.x - this.player.offset.x,
                 this.player.y - this.player.offset.y,
                 this.player.width,
-                1
+                this.yJumpRate
             );
             if (clrAbove){
-                this.moveY = 1;
+                this.moveY = this.yJumpRate * -1;
             } else {
                 this.moveY = 0;
                 this.player.stopJump();
@@ -227,110 +229,18 @@ define(['jquery'], function (jquery) {
 
         // Sideways
         if (this.moveX){
-            var x = this.player.x + (this.player.offset.x+1 * this.moveX);
-            var y = this.player.y-2;
-            // this.player.ctx.fillStyle = 'rgba(255,0,0,.5)';
-            // this.player.ctx.fillRect( x, y, 2,2 );
+            console.log(this.moveX);
+            var x = this.player.x + (this.player.offset.x * this.moveX);
+            var y = this.player.y + (this.player.offset.y * this.moveY);;
             var clrBeside = this.land.isClear(
                 x, y,
-                2,
+                this.xMoveRate * this.moveX,
                 4
             );
-            if (! clrBeside){
+            if (clrBeside){
+                this.moveX = this.xMoveRate * this.moveX;
+            } else {
                 this.moveX = 0;
-            }
-        }
-    };
-
-    Game.prototype.collisionDetection_and_gravity1 = function () {
-        // Need to fall?
-        var imgd = this.land.ctx.getImageData(
-            (this.land.x * -1) + this.player.x - this.player.offset.x,
-            (this.land.y * -1) + this.player.y + this.player.offset.y,
-            this.player.img.width,
-            1
-        );
-
-        var imgd8 = new Uint8Array( imgd.data.buffer );
-        var x=0, clearUnder=0, clearUnderLeft=0, clearUnderRight=0;
-        // Check transparent pixels
-        for (var i=3; i < imgd8.length; i+=4){
-            if (imgd8[i] < 127){
-                clearUnder++;
-                if (x < this.player.offset.x){
-                    clearUnderLeft ++;
-                } else {
-                    clearUnderRight ++;
-                }
-            }
-            x = x > this.player.width? 0 : x+1;
-        }
-
-        // Fall if  the pixels below player are 'clear'
-        if (clearUnderLeft || clearUnderLeft
-            || clearUnder >= imgd.data.length/4
-        ){
-            if (! this.player.falling){
-                this.player.falling = new Date().getTime();
-            }
-            // var duration = new Date().getTime() - this.player.falling;
-            // Increase velocity
-            // this.moveY = -1 * (1 + (parseInt(duration/200)*2));
-            // We could safely jump our own height without checking
-            this.moveY = -1;
-            // Fall left/right if only half ground beneath
-            if (clearUnderLeft > clearUnderRight){
-                this.moveX += 1;
-            }
-            else if (clearUnderLeft < clearUnderRight){
-                this.moveX -= 1;
-            }
-        }
-
-        else {
-            this.moveY = 0;
-            this.player.falling = 0;
-        }
-
-        // Prevent moving left/right into things
-        if (this.moveX !== 0){
-            var xOffset = this.player.offset.x;
-            if (this.moveX > 0){
-                xOffset *= -1;
-            }
-
-            var imgd = this.land.ctx.getImageData(
-                (this.land.x * -1) + this.player.x + xOffset,
-                (this.land.y * -1) + this.player.y - this.player.offset.y,
-                Math.abs(this.moveX),
-                this.player.img.height
-            );
-
-            var imgd8 = new Uint8Array( imgd.data.buffer );
-            var clear = 0;
-            var clearPxNeeded = imgd.data.length/8;
-            // Check transparent pixels
-            for (var i=3; i < imgd.data.length; i += 4){
-                if (imgd8[i] > 127){
-                    clear++;
-                    // 50% not clear?
-                    if (clear >= clearPxNeeded) {
-                        this.moveX = 0;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (this.player.jumpStartTime){
-            var duration = new Date().getTime() - this.player.jumpStartTime;
-            if (duration > 2000){
-                this.player.jumpStartTime = 0;
-            }
-            else {
-                // decrease velocity
-                // this.moveY = (100 - duration/10) / 5;
-                this.moveY = 1;
             }
         }
     };

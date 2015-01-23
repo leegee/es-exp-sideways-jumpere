@@ -66,7 +66,8 @@ define(['jquery'], function (jquery) {
             }
         )
         .then(
-            this.player.load().then(
+            this.player.load()
+            .then(
                 function () {
                     self.playing = true;
                     console.log('Loaded player');

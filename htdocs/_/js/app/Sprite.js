@@ -41,32 +41,37 @@ define(['jquery'], function (jquery) {
 
             self.img.onload = function() {
                 console.debug('Loaded Player.img');
-                self.x = parseInt( (window.innerWidth/2) - (self.img.width/2) );
-                self.y = parseInt( (window.innerHeight/2) - (self.img.height/2) );
-                self.width = self.img.width;
-                self.height = self.img.height;
-                self.offset = {
-                    x: self.img.width  / 2,
-                    y: self.img.height / 2
-                };
-
-                self.el = jquery(
-                    '<canvas id="player" '
-                    +'width="'+window.innerWidth+'" '
-                    +'height="'+window.innerWidth+'" '
-                    +'style="'
-                        +'width:'+window.innerWidth+'px;'
-                        +'height:'+window.innerWidth+'px;'
-                    +'"/>'
-                );
-                jquery( document.body ).append( self.el );
-                self.ctx = self.el.get(0).getContext('2d');
-                self.render();
-                resolve();
+                self.loaded();
+                return resolve();
                 // reject( new Error('er'))
             };
         });
     };
+
+    Sprite.prototype.loaded = function () {
+        this.width = this.img.width;
+        this.height = this.img.height;
+        this.offset = {
+            x: this.width  / 2,
+            y: this.height / 2
+        };
+        this.setEl();
+        // this.render();
+    };
+
+    Sprite.prototype.setEl = function () {
+        this.el = jquery(
+            '<canvas id="player" '
+            +'width="'+window.innerWidth+'" '
+            +'height="'+window.innerWidth+'" '
+            +'style="'
+                +'width:'+window.innerWidth+'px;'
+                +'height:'+window.innerWidth+'px;'
+            +'"/>'
+        );
+        jquery( document.body ).append( this.el );
+        this.ctx = this.el.get(0).getContext('2d');
+    }
 
     Sprite.prototype.setMove = function (x, y){
         if (x >= this.land.sides.right){

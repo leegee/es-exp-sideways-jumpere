@@ -99,19 +99,28 @@ define(['jquery'], function (jquery) {
     };
 
     Land.prototype.mine = function (atX,atY, p2x,p2y) {
-        var angleRad = Math.atan2(atY - p2y, atX - p2x);
-        var mineX = atX + parseInt(
-            (this.cellSize*-1) * Math.cos( angleRad )
-        );
-        var mineY = atY + parseInt(
-            (this.cellSize*-1) * Math.sin( angleRad )
-        );
+        var mineX, mineY;
+
+        if (p2x){
+            var angleRad = Math.atan2(atY - p2y, atX - p2x);
+            mineX = atX + parseInt(
+                this.cellSize * Math.cos( angleRad ) * -1
+            );
+            mineY = atY + parseInt(
+                this.cellSize * Math.sin( angleRad ) * -1
+            );
+        }
+
+        else {
+            mineX = atX;
+            mineY = atY;
+        }
 
         mineX = this.confine(mineX);
         mineY = this.confine(mineY);
 
-        var x = Math.abs(this.x) + mineX - this.cellSizeHalf -1;
-        var y = Math.abs(this.y) + mineY - this.cellSizeHalf -1;
+        var x = Math.abs(this.x) + mineX; //  - this.cellSizeHalf;
+        var y = Math.abs(this.y) + mineY; // - this.cellSizeHalf;
 
         var imgd = this.ctx.getImageData( x, y, this.cellSize, this.cellSize );
         var imgd8 = new Uint8Array( imgd.data.buffer );

@@ -52,10 +52,17 @@ define(['jquery'], function (jquery) {
         });
 
         // this.land.onReady( this, this.run );
-        this.land.load().then(
+        this.land.load()
+        .then(
             function () {
                 console.log('Loaded Land');
                 self.run();
+            }
+        )
+        .catch(
+            function (e){
+                console.error(e)
+                throw(e);
             }
         )
         .then(

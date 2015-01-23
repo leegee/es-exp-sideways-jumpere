@@ -10,6 +10,8 @@ define(['jquery'], function (jquery) {
         console.debug('Land.constructor enter ', arguments);
         var self    = this;
         this.ready  = false;
+        this.cellSize = 26;
+        this.cellSizeHalf = this.cellSize/2;
         this.transparentThreshold = 127;
         this.el     = null;
         this.dom    = null;
@@ -19,8 +21,6 @@ define(['jquery'], function (jquery) {
             top:    null,
             bottom: null
         };
-        this.mineSquare     = 12;
-        this.mineSquareHalf = 6;
         this.scale = {
             x: 1,
             y: 1
@@ -101,16 +101,19 @@ define(['jquery'], function (jquery) {
     Land.prototype.mine = function (atX,atY, p2x,p2y) {
         var angleRad = Math.atan2(atY - p2y, atX - p2x);
         var mineX = atX + parseInt(
-            (this.mineSquare*-1) * Math.cos( angleRad )
+            (this.cellSize*-1) * Math.cos( angleRad )
         );
         var mineY = atY + parseInt(
-            (this.mineSquare*-1) * Math.sin( angleRad )
+            (this.cellSize*-1) * Math.sin( angleRad )
         );
 
-        var x = Math.abs(this.x) + mineX - this.mineSquareHalf -1;
-        var y = Math.abs(this.y) + mineY - this.mineSquareHalf -1;
+        mineX = this.confine(mineX);
+        mineY = this.confine(mineY);
 
-        var imgd = this.ctx.getImageData( x, y, this.mineSquare, this.mineSquare );
+        var x = Math.abs(this.x) + mineX - this.cellSizeHalf -1;
+        var y = Math.abs(this.y) + mineY - this.cellSizeHalf -1;
+
+        var imgd = this.ctx.getImageData( x, y, this.cellSize, this.cellSize );
         var imgd8 = new Uint8Array( imgd.data.buffer );
         var r=-1, g=-1, b=-1;
         for (var i=0; i<imgd8.length; i+=4){
@@ -126,7 +129,7 @@ define(['jquery'], function (jquery) {
         }
 
         this.ctx.clearRect(
-            x, y, this.mineSquare, this.mineSquare
+            x, y, this.cellSize, this.cellSize
         );
 
         return r===-1? null : [r,g,b];
@@ -134,9 +137,9 @@ define(['jquery'], function (jquery) {
         // this.ctx.globalCompositeOperation = 'destination-out';
         // this.ctx.beginPath();
         // this.ctx.arc(
-        //     Math.abs(this.x) + x - this.mineSquareHalf,
-        //     Math.abs(this.y) + y - this.mineSquareHalf,
-        //     this.mineSquare,
+        //     Math.abs(this.x) + x - this.cellSizeHalf,
+        //     Math.abs(this.y) + y - this.cellSizeHalf,
+        //     this.cellSize,
         //     0, Math.PI*2, false
         // );
         // this.ctx.closePath();
@@ -165,6 +168,12 @@ define(['jquery'], function (jquery) {
 
         return rv;
     }
+
+    Land.prototype.confine = function (p) {
+        var rv = (parseInt( p / this.cellSize) * this.cellSize); // + this.cellSizeHalf;
+        // console.log('Confine %d to %d', p, rv);
+        return rv;
+    };
 
     Land.prototype.isClear = function (x,y, w,h){
         x = (this.x * -1) + x;

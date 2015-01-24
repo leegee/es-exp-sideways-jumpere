@@ -164,6 +164,7 @@ define(['jquery'], function (jquery) {
         var thirdW = w/3;
         var thirdH = h/3;
         var imgd = this.ctx.getImageData( x, y, w, h );
+        console.log(x,y);
         var imgd8 = new Uint8Array( imgd.data.buffer );
 
         // Check only transparent pixels
@@ -184,7 +185,7 @@ define(['jquery'], function (jquery) {
         return rv;
     };
 
-    Land.prototype.isClear = function (x,y, w,h){
+    Land.prototype.isClear = function (x,y, w,h, debug){
         x = (this.x * -1) + x;
         y = (this.y * -1) + y;
         var imgd = this.ctx.getImageData( x, y, w, h );
@@ -192,9 +193,9 @@ define(['jquery'], function (jquery) {
         var clear = 0;
         var shouldBeClear = imgd8.length/8;
 
-        // Check only transparent pixels
+        // Check only alternate transparent pixels
         var px = 0;
-        for (var i=3; i < imgd8.length; i+=4){
+        for (var i=3; i < imgd8.length; i+=8){
             if (imgd8[i] < 127){
                 clear ++;
                 if (clear === shouldBeClear) break;

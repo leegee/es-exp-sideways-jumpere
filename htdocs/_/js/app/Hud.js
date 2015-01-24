@@ -20,6 +20,9 @@ define(['jquery'], function (jquery) {
             i++;
         }
 
+        this.modeEl = jquery('<div id="mode"></div>');
+        this.el.append( this.modeEl );
+
         jquery( document.body ).append( this.el );
     };
 

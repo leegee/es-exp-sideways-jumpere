@@ -27,13 +27,10 @@
         baseUrl: baseUrl, // Relative to the caller
         paths: {
             jquery: [
-                '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min',
-                'vendor/jquery-1.11.1.min'
+                '//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min',
+                'bower_components/jquery/dist/jquery.min'
             ],
-            'jquery-ui'         : 'vendor/modernizer-2.8.0.min',
-            'jquery-ui-i18n'    : 'vendor/jquery-ui-i18n',
-            modernizer          : 'vendor/modernizr-2.8.0.min',
-            box2d               : 'vendor/bower_components/box2d.js/box2d'
+            modernizer          : 'vendor/modernizr-2.8.0.min'
         },
         shim: {
             box2d: {

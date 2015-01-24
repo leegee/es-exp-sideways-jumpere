@@ -18,12 +18,14 @@ define(['jquery'], function (jquery) {
             x: null,
             y: null
         };
-
-        this.moveX      = 0;
-        this.moveY      = 0;
-        this.xMoveRate  = 2;
-        this.yFallRate  = 2;
-        this.yJumpRate  = 2;
+        this.dir = {
+            x : 0,
+            y : 0
+        };
+        this.moveby = {
+            x : 2,
+            y : 2
+        };
         this.img        = new Image();
         this.img_src    = null;
     };
@@ -75,19 +77,19 @@ define(['jquery'], function (jquery) {
 
     Sprite.prototype.setMove = function (x, y){
         if (x >= this.land.sides.right){
-            this.moveX = this.xMoveRate;
+            this.dir.x = 1;
         }
         else if (x <= this.land.sides.left){
-            this.moveX = this.xMoveRate * -1;
+            this.dir.x = -1;
         }
         else {
-            this.moveX = 0;
+            this.dir.x = 0;
         }
 
-        if (this.jumpStartTime){
-            // this.moveY = (100 - duration/10) / 5;
-            this.moveY = -1 * this.yFallRate;
-        }
+        // if (this.jumpStartTime){
+        //     // this.dir.y = (100 - duration/10) / 5;
+        //     this.dir.y = -1;
+        // }
     };
 
     Sprite.prototype.moveBy = function (x, y) {
@@ -105,7 +107,8 @@ define(['jquery'], function (jquery) {
     };
 
     Sprite.prototype.render = function () {
-        this.ctx.drawImage( this.img,
+        this.ctx.drawImage(
+            this.img,
             parseInt( this.x - this.offset.x ),
             parseInt( this.y - this.offset.y)
         );
@@ -121,10 +124,12 @@ define(['jquery'], function (jquery) {
             777
         );
         this.falling = false;
+        this.dir.y = -1;
     };
 
     Sprite.prototype.stopJump = function () {
         this.jumpStartTime = 0;
+        this.dir.y = 0;
     };
 
     Sprite.prototype.collisionDetection_and_gravity = function () {
@@ -132,16 +137,16 @@ define(['jquery'], function (jquery) {
             var clrBelow = this.land.isClear(
                 this.x - this.offset.x,
                 this.y + this.offset.y,
-                this.offset.y,
-                this.yFallRate
+                this.width,
+                this.moveby.y
             );
             if (clrBelow){
-                this.moveY = this.yFallRate;
+                this.dir.y = 1;
                 if (! this.falling){
                     this.falling = true;
                 }
             } else {
-                this.moveY = 0;
+                this.dir.y = 0;
                 this.falling = 0;
             }
         }
@@ -152,29 +157,28 @@ define(['jquery'], function (jquery) {
                 this.x - this.offset.x,
                 this.y - this.offset.y,
                 this.width,
-                this.yJumpRate
+                this.moveby.y
             );
             if (clrAbove){
-                this.moveY = this.yJumpRate * -1;
+                this.dir.y = -1;
             } else {
-                this.moveY = 0;
                 this.stopJump();
             }
         }
 
         // Sideways
-        if (this.moveX){
-            var x = this.x + (this.offset.x * this.moveX);
-            var y = this.y + (this.offset.y * this.moveY);;
+        if (this.dir.x !== 0){
+            var x = this.x + (this.offset.x  * this.dir.x);
+            var y = this.y + (this.offset.y  * this.dir.y);
             var clrBeside = this.land.isClear(
                 x, y,
-                this.xMoveRate * this.moveX,
-                4
+                this.moveby.x,
+                1
             );
-            if (clrBeside){
-                this.moveX = this.xMoveRate * this.moveX;
-            } else {
-                this.moveX = 0;
+
+            if (! clrBeside){
+                this.dir.x = 0;
+                this.dir.y -= 2;
             }
         }
     };

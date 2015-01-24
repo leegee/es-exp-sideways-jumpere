@@ -177,7 +177,10 @@ define(['jquery'], function (jquery) {
     Game.prototype.tick = function (args) {
         this.player.setMove( this.pageX, this.pageY );
         this.player.collisionDetection_and_gravity();
-        this.land.moveBy( this.player.moveX, this.player.moveY );
+        this.land.moveBy(
+            this.player.moveby.x * this.player.dir.x,
+            this.player.moveby.y * this.player.dir.y
+        );
     };
 
     return Game;

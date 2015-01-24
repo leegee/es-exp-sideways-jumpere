@@ -77,6 +77,12 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
                 '<%= grunt.template.today("yyyy-mm-dd") %>\n',
 
+        // bower: {
+        //     install: {
+        //     //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
+        //     }
+        // },
+
         /** <h4>Task</h4> Runs a strict syntax check to pick up
          * common coding errors and legal syntax which may cause
          * problems for optimization.

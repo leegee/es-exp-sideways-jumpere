@@ -1,0 +1,26 @@
+{
+  "name": "es-exp-scrolling-game",
+  "version": "0.0.0",
+  "homepage": "https://github.com/leegee/es-exp-sideways-jumpere",
+  "authors": [
+    "Lee Goddard <lee@leegoddard.net>"
+  ],
+  "description": "Illy's ES scrolling game",
+  "main": "htdocs/_/js/index.js",
+  "moduleType": [
+    "amd",
+    "es6"
+  ],
+  "keywords": [
+    "scrolling",
+    "game"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

@@ -71,17 +71,23 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-rename');
     grunt.loadNpmTasks('grunt-mocha');
+    grunt.loadNpmTasks('grunt-bower-task');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
                 '<%= grunt.template.today("yyyy-mm-dd") %>\n',
 
-        // bower: {
-        //     install: {
-        //     //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
-        //     }
-        // },
+        bower: {
+            install: {
+            //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
+            },
+            options: {
+                targetDir: 'htdocs/_/js/vendor/bower_components/',
+                cleanBowerDir: true,
+                layout: 'byComponent'
+            }
+        },
 
         /** <h4>Task</h4> Runs a strict syntax check to pick up
          * common coding errors and legal syntax which may cause

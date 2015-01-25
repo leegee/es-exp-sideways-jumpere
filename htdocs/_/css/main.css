@@ -111,32 +111,55 @@ textarea {
     background: transparent;
 }
 
-#hud {
+/** HUD **/
+
+#mode,
+#palette {
     z-index: 100;
     position: absolute;
     top: 5%;
     right: 10%;
     width: auto;
     height: auto;
-    padding: 2pt;
     background: rgba(255,255,255,0.5);
-    border: 2px solid rgba(255,255,255,0.75);
+    font-family: "Courier New",Courier,Mono;
+    font-weight: bold;
 }
 
-#hud div {
+#palette {
+    display: block;
+    font-size: 12pt;
+    padding: 1em;
+}
+#mode {
+    font-size: 12pt;
+    border: 2pt solid white;
+    padding: 4pt;
+    left: 5%;
+    right: auto;
+}
+
+#mode li,
+#clrs li {
     width: auto;
-    height:100%;
-    display: inline-block;
-    font-size: 24pt;
-    font-family: "Courier New",Courier,Mono;
-    font-weight:bold;
+    padding: 4pt;
+    background: none;
+}
+#mode li > *,
+#clrs li > * {
     margin-left: 1em;
 }
 
+#clrs li {
+    display: inline-block;
+}
 
-
-
-
+.highlight {
+    background: yellow;
+}
+.no-highlight {
+    background: none;
+}
 
 /* ==========================================================================
    Helper classes

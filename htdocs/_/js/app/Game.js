@@ -45,10 +45,12 @@ define(['jquery'], function (jquery) {
         this.yJumpRate  = 2;
         self.playing    = false;
 
-        this.hud        = new args.Hud();
         this.land       = new args.Land();
         this.player     = new args.Player({
             land: this.land
+        });
+        this.hud        = new args.Hud({
+            numberOfColours: this.player.numberOfColours
         });
 
         // this.land.onReady( this, this.run );
@@ -116,9 +118,14 @@ define(['jquery'], function (jquery) {
                 self.player.startJump();
             }
             else {
-                self.hud.addRgb(
-                    self.player.startMining( self.pageX, self.pageY )
-                );
+                if (self.player.mode === 'dig'){
+                    self.hud.addRgb(
+                        self.player.startMining( self.pageX, self.pageY )
+                    );
+                }
+                else {
+                    self.player.build();
+                }
             }
             return false;
         };
@@ -133,6 +140,13 @@ define(['jquery'], function (jquery) {
         document.onkeypress = function handleKeyPress (e) {
             e = e || window.e;
             e.preventDefault() || e.stopPropagation();
+            var clrKey = e.charCode - 48;
+            if ( clrKey > 0 && clrKey <= self.player.numberOfColours + 1){
+                self.player.setClr( clrKey );
+                self.hud.setClr( clrKey );
+            } else {
+                console.log(e.charCode);
+            }
             return false;
         };
 

@@ -14,6 +14,11 @@ define(['jquery'], function (jquery) {
         this.height          = null;
         this.img             = null;
         this.ctx             = null;
+        this.clr = {
+            above: null,
+            below: null,
+            beside: null
+        }
         this.offset = {
             x: null,
             y: null
@@ -134,36 +139,12 @@ define(['jquery'], function (jquery) {
 
     Sprite.prototype.collisionDetection_and_gravity = function () {
         if (! this.jumpStartTime){
-            var clrBelow = this.land.isClear(
-                this.x - this.offset.x,
-                this.y + this.offset.y,
-                this.width,
-                this.moveby.y
-            );
-            if (clrBelow){
-                this.dir.y = 1;
-                if (! this.falling){
-                    this.falling = true;
-                }
-            } else {
-                this.dir.y = 0;
-                this.falling = 0;
-            }
+            this.checkMoveBelow();
         }
 
         // Jumping
         else {
-            var clrAbove = this.land.isClear(
-                this.x - this.offset.x,
-                this.y - this.offset.y,
-                this.width,
-                this.moveby.y
-            );
-            if (clrAbove){
-                this.dir.y = -1;
-            } else {
-                this.stopJump();
-            }
+            this.checkMoveAbove();
         }
 
         // Sideways
@@ -177,11 +158,48 @@ define(['jquery'], function (jquery) {
             );
 
             if (! clrBeside){
-                this.dir.x = 0;
-                this.dir.y -= 2;
+                this.dir.y = this.moveby.y * -1;
+                if (this.checkMoveAbove()){
+                    this.dir.y = this.moveby.y * -1;
+                } else {
+                    this.dir.x = 0;
+                    this.dir.y = 0;
+                }
             }
         }
     };
+
+    Sprite.prototype.checkMoveAbove = function () {
+        this.clr.above = this.land.isClear(
+            this.x - this.offset.x,
+            this.y - this.offset.y,
+            this.width,
+            this.moveby.y
+        );
+        if (this.clr.above){
+            this.dir.y = this.moveby.y * -1;
+        } else {
+            this.stopJump();
+        }
+    }
+
+    Sprite.prototype.checkMoveBelow = function () {
+        this.clr.below = this.land.isClear(
+            this.x - this.offset.x,
+            this.y + this.offset.y,
+            this.width,
+            this.moveby.y
+        );
+        if (this.clr.below){
+            this.dir.y = 1;
+            if (! this.falling){
+                this.falling = true;
+            }
+        } else {
+            this.dir.y = 0;
+            this.falling = 0;
+        }
+    }
 
     return Sprite;
 });

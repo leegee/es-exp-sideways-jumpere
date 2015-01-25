@@ -6,6 +6,7 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
         console.debug('Player.constructor enter ', arguments);
         Sprite.call(this, args);
         this.mining  = false;
+        this.numberOfColours = 7;
         this.img_src = '/img/player.png';
     };
 
@@ -14,6 +15,7 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
 
     Player.prototype.load = function () {
         var self = this;
+        self.mode = 'dig';
         return new Promise ( function (resolve, reject) {
             self.setEl();
             self.loaded();
@@ -24,7 +26,7 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
     Player.prototype.loaded = function () {
         this.x = parseInt( (window.innerWidth/2) - (this.width/2) );
         this.y = parseInt( (window.innerHeight/2) - (this.height/2) );
-        this.width = this.land.cellSize;
+        this.width = this.land.cellSize/2;
         this.height = this.land.cellSize;
         this.offset.x = this.width/2;
         this.offset.y = this.height/2;
@@ -36,7 +38,7 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
 
         this.mining = true;
 
-        // this.land.mine(this.x, this.y);
+        this.land.mine(this.x, this.y);
 
         var rgb = this.land.mine(this.x, this.y, dirX, dirY);
 
@@ -57,6 +59,20 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
             this.height
         );
     };
+
+    Player.prototype.setMode = function (mode) {
+        switch (mode){
+            case 'dig':
+                this.mode = 'dig';
+                break;
+            case 'build':
+                this.mode = 'build';
+                break;
+        }
+    };
+
+    Player.prototype.setClr = function (index) {
+    }
 
     return Player;
 });

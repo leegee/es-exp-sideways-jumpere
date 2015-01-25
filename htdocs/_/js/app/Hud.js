@@ -1,37 +1,54 @@
 'use strict';
 
-define(['jquery'], function (jquery) {
+define(['jquery', 'mustache'], function (jquery, Mustache) {
 
     var Hud = function (args) {
         console.debug('Hud.constructor enter ', arguments);
+        var self = this;
         this.rgb = [];
-        this.numberOfColours = 7;
-        this.el = jquery('<div id="hud"></div>');
-        this.clrEls = [];
+        this.clr = null;
+        this.numberOfColours = args.numberOfColours;
+        this.el = {
+            clrs: [],
+            hud: null,
+            mode: null
+        };
 
-        var i = 0;
-        for (var hue=0; hue<360; hue+=(360 / this.numberOfColours)){
-            this.clrEls[i] = jquery(
-                '<div id="clr'+i+'" style="color:hsl('
-                + hue
-                + ',80%,70%)"></div>'
-            );
-            this.el.append( this.clrEls[i] );
-            i++;
+        jquery.get('_/templates/hud.html', function (template) {
+            self.el.hud = Mustache.render(template, {});;
+            jquery( document.body ).append( self.el.hud );
+            self.el.palette = jquery('#palette');
+            var i = 0;
+            for (var hue=0; hue<360; hue+=(360 / self.numberOfColours)){
+                self.el.clrs[i] = jquery(
+                    '<li id="clr'+(i)+'" style="color:hsl('
+                    + parseInt(hue)
+                    + ',80%,70%)">0</li>'
+                );
+                self.el.palette.append( self.el.clrs[i] );
+                i++;
+            }
+        });
+    };
+
+    Hud.prototype.setClr = function (index) {
+        index --;
+        if (index <= this.numberOfColours){
+            if (this.clr !== null){
+                this.el.clrs[ this.clr ].removeClass('highlight');
+            }
+            this.clr = index;
+            this.el.clrs[ this.clr ].addClass('highlight');
+            console.log('Select clr index ', this.clr);
         }
-
-        this.modeEl = jquery('<div id="mode"></div>');
-        this.el.append( this.modeEl );
-
-        jquery( document.body ).append( this.el );
     };
 
     Hud.prototype.addRgb = function (rgb) {
         if (rgb !== null && typeof rgb[0] !== 'undefined'){
             var hsl = this.rgbToHsl(rgb[0], rgb[1], rgb[2]);
             var hue = parseInt(this.numberOfColours * hsl[0] );
-            var text = this.clrEls[hue].text() || 0;
-            this.clrEls[hue].text(
+            var text = this.el.clrs[hue].text() || 0;
+            this.el.clrs[hue].text(
                 parseInt( text ) + 1
             );
         }

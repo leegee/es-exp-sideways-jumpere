@@ -10,7 +10,7 @@ define(['jquery'], function (jquery) {
         console.debug('Land.constructor enter ', arguments);
         var self    = this;
         this.ready  = false;
-        this.cellSize = 26;
+        this.cellSize = 20;
         this.cellSizeHalf = this.cellSize/2;
         this.transparentThreshold = 127;
         this.el     = null;
@@ -21,12 +21,24 @@ define(['jquery'], function (jquery) {
             top:    null,
             bottom: null
         };
+        this.bounds = {
+            left: null,
+            right: null
+        }
         this.scale = {
             x: 1,
             y: 1
         };
         this.x = this.y = 0;
         this.img = null;
+        this.sides = {
+            left: parseInt(
+                window.innerWidth / 3
+            ),
+            right: parseInt(
+                window.innerWidth - ( window.innerWidth / 3 )
+            )
+        };
     };
 
     Land.prototype.load = function () {
@@ -38,25 +50,39 @@ define(['jquery'], function (jquery) {
         return new Promise ( function (resolve, reject) {
             self.img.onload = function() {
                 console.debug('Loaded Land.img');
+
+                self.width = self.img.width + (2 * self.sides.left);
+                self.height = self.img.height + (2 * self.sides.left);
+
                 self.el = jquery(
                     '<canvas id="land"'
-                    +'width="'+self.img.width+'" height="'+self.img.height+'" '
+                    +'width="'+self.width+'" height="'+self.height+'" '
                     +'style="'
-                        +'width:'+self.img.width+'px;height:'+self.img.height+'px;'
+                        +'width:'+self.width+'px;height:'+self.height+'px;'
                     +'"/>'
                 );
                 jquery( document.body ).append( self.el );
                 self.dom = self.el.get(0);
                 self.ctx = self.dom.getContext('2d');
-                self.ctx.drawImage( self.img, 0, 0 );
-
-                self.sides.left = parseInt(
-                    window.innerWidth / 3
+                self.ctx.drawImage(
+                    self.img,
+                    self.sides.left,
+                    0
                 );
-                self.sides.right = parseInt(
-                    window.innerWidth - ( window.innerWidth / 3 )
+                self.ctx.rect(
+                    self.sides.left,
+                    0,
+                    self.img.width,
+                    self.img.height
                 );
+                self.ctx.stroke();
 
+                self.bounds.left  = self.sides.left;
+                self.bounds.right = (self.width + self.sides.left) * -1;
+
+                self.x = (this.width/2) * -1;
+                self.y = 0;
+                self.render();
                 resolve();
             };
         });
@@ -77,12 +103,13 @@ define(['jquery'], function (jquery) {
         this.x = parseInt( this.x + mx );
         this.y = parseInt( this.y + my );
 
-        if (this.x < window.innerWidth - this.img.width) {
-            this.x -= mx;
+        if (this.x < this.bounds.right ) { // window.innerWidth - this.img.width) {
+            // this.x -= mx;
+            this.x = this.bounds.right + mx;
             this.scrolled.x = false;
         }
-        else if (this.x > 0) {
-            this.x = 0;
+        else if (this.x > this.bounds.left){ // 0) {
+            this.x = this.bounds.left - mx;
             this.scrolled.x = false;
         }
 
@@ -95,8 +122,13 @@ define(['jquery'], function (jquery) {
             this.scrolled.y = false;
         }
 
+        this.render();
+    };
+
+    Land.prototype.render = function () {
         this.dom.style.transform="translate("+this.x+"px,"+this.y+"px)";
     };
+
 
     Land.prototype.mine = function (atX,atY, p2x,p2y) {
         var mineX, mineY;

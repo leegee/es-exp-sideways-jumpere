@@ -28,14 +28,13 @@
         paths: {
             jquery: [
                 '//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min',
-                'htdocs/_/js/vendor/bower_components/jquery/dist/jquery.min'
+                'vendor/bower_components/jquery/dist/jquery.min'
             ],
-            modernizer          : 'vendor/modernizr-2.8.0.min'
+            modernizer : 'vendor/modernizr-2.8.0.min',
+            mustache: 'vendor/mustache'
+
         },
         shim: {
-            box2d: {
-                exports: 'Box2D'
-            }
         }
     });
 

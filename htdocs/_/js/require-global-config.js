@@ -30,7 +30,6 @@
                 '//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min',
                 'vendor/bower_components/jquery/dist/jquery.min'
             ],
-            modernizer : 'vendor/modernizr-2.8.0.min',
             mustache: 'vendor/bower_components/mustache.js/mustache'
         }
         // shim: {

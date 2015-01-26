@@ -1,12 +1,12 @@
 define( [
-    'modernizer', 'jquery',
+    'jquery',
     'app/Game',
     'app/Land',
     'app/Player',
     'app/Hud'
 ],
 function (
-    _, jquery, Game, Land, Player, Hud
+    jquery, Game, Land, Player, Hud
 ) {
     jquery(document).ready( function () {
         jquery('body').html('');

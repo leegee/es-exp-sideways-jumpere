@@ -31,11 +31,16 @@
                 'vendor/bower_components/jquery/dist/jquery.min'
             ],
             modernizer : 'vendor/modernizr-2.8.0.min',
-            mustache: 'vendor/mustache'
-
-        },
-        shim: {
+            mustache: 'vendor/bower_components/mustache.js/mustache'
         }
+        // shim: {
+        //     jquery: {
+        //         exports: "jQuery"
+        //     },
+        //     'jQuery-Mustache': {
+        //         deps: [ 'jQuery' ]
+        //     }
+        // }
     });
 
 }());

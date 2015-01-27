@@ -5,8 +5,9 @@ define(['jquery'], function (jquery) {
     var Sprite = function (args) {
         console.debug('Sprite.constructor enter ', arguments);
         var self             = this;
-        this.land           = args.land;
+        this.land            = args.land;
         this.jumpStartTime   = 0;
+        this.requestStop     = false;
         this.falling         = false;
         this.x               = null;
         this.y               = null;
@@ -80,22 +81,7 @@ define(['jquery'], function (jquery) {
         this.ctx = this.el.get(0).getContext('2d');
     }
 
-    Sprite.prototype.setMove = function (x, y){
-        if (x >= this.land.sides.right){
-            this.dir.x = 1;
-        }
-        else if (x <= this.land.sides.left){
-            this.dir.x = -1;
-        }
-        else {
-            this.dir.x = 0;
-        }
-
-        // if (this.jumpStartTime){
-        //     // this.dir.y = (100 - duration/10) / 5;
-        //     this.dir.y = -1;
-        // }
-    };
+    Sprite.prototype.setMove = function (x, y){}
 
     Sprite.prototype.moveBy = function (x, y) {
         if (!x && !y) return;
@@ -125,7 +111,9 @@ define(['jquery'], function (jquery) {
         }
         var self = this;
         this.jumpStartTime = setTimeout(
-            function () { self.stopJump() },
+            function () {
+                self.stopJump()
+            },
             777
         );
         this.falling = false;
@@ -158,15 +146,18 @@ define(['jquery'], function (jquery) {
             );
 
             if (! clrBeside){
-                this.dir.y = this.moveby.y * -1;
-                if (this.checkMoveAbove()){
+                this.dir.x = 0;
+                if (!this.falling) {
                     this.dir.y = this.moveby.y * -1;
-                } else {
-                    this.dir.x = 0;
-                    this.dir.y = 0;
+                    if (this.checkMoveAbove()){
+                        this.dir.y = this.moveby.y * -1;
+                    } else {
+                        this.dir.y = 0;
+                    }
                 }
             }
         }
+        console.log('Leave with ', this.dir.y, this.falling);
     };
 
     Sprite.prototype.checkMoveAbove = function () {
@@ -188,17 +179,30 @@ define(['jquery'], function (jquery) {
             this.x - this.offset.x,
             this.y + this.offset.y,
             this.width,
-            this.moveby.y
+            this.moveby.y,
+            this.debug
         );
         if (this.clr.below){
+            console.log('fall');
             this.dir.y = 1;
-            if (! this.falling){
-                this.falling = true;
-            }
+            this.falling = true;
         } else {
+            if (this.debug){
+                console.log('land below');
+                this.land.ctx.fillStyle = '#FFFF00';
+                this.land.ctx.fillRect(
+                    this.land.debug[0],
+                    this.land.debug[1],
+                    this.land.debug[2],
+                    this.land.debug[3]
+                );
+            }
+
             this.dir.y = 0;
             this.falling = 0;
         }
+
+        this.debug = false;
     }
 
     return Sprite;

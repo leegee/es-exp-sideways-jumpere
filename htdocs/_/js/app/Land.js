@@ -1,6 +1,6 @@
 'use strict';
 
-define(['jquery'], function (jquery) {
+define(['jquery', 'app/Grid'], function (jquery, Grid) {
 
 /*  An image on a canvas.
     The canvas is moved by CSS, the canvas is editable.
@@ -13,6 +13,8 @@ define(['jquery'], function (jquery) {
         this.cellSize = 20;
         this.cellSizeHalf = this.cellSize/2;
         this.transparentThreshold = 127;
+        this.saturationPc = 70;
+        this.lightnessPc  = 70;
         this.el     = null;
         this.dom    = null;
         this.sides = {
@@ -77,6 +79,12 @@ define(['jquery'], function (jquery) {
                 );
                 self.ctx.stroke();
 
+                self.grid = new Grid({
+                    cellSize: self.cellSize,
+                    width: self.width,
+                    height: self.height
+                });
+
                 self.bounds.left  = self.sides.left;
                 self.bounds.right = (self.width + self.sides.left) * -1;
 
@@ -130,26 +138,62 @@ define(['jquery'], function (jquery) {
     };
 
 
+    Land.prototype.getSquare = function (atX,atY, p2x,p2y) {
+        var angleRad = Math.atan2(atY - p2y, atX - p2x);
+        var x = atX + parseInt(
+            this.cellSize * Math.cos( angleRad ) * -1
+        ),
+            y = atY + parseInt(
+            this.cellSize * Math.sin( angleRad ) * -1
+        );
+
+        return [this.confine(x), this.confine(y)];
+    };
+
+
+    Land.prototype.build = function (atX,atY, p2x,p2y, rgb) {
+        var buildX, buildY;
+
+        if (p2x){
+            var angleRad = Math.atan2(atY - p2y, atX - p2x);
+            var square = this.getSquare(atX,atY, p2x,p2y);
+            buildX = square[0];
+            buildY = square[1];
+        }
+
+        else {
+            buildX = atX;
+            buildY = atY;
+        }
+
+        var x = Math.abs(this.x) + buildX;
+        var y = Math.abs(this.y) + buildY;
+
+        // if (this.isClear( x,y, this.cellSize, this.cellSize)){
+        //     console.log("OK");
+        // }
+
+        this.ctx.fillStyle = rgb;
+        this.ctx.fillRect( x, y, this.cellSize, this.cellSize );
+
+        return true;
+    };
+
+
     Land.prototype.mine = function (atX,atY, p2x,p2y) {
         var mineX, mineY;
 
         if (p2x){
             var angleRad = Math.atan2(atY - p2y, atX - p2x);
-            mineX = atX + parseInt(
-                this.cellSize * Math.cos( angleRad ) * -1
-            );
-            mineY = atY + parseInt(
-                this.cellSize * Math.sin( angleRad ) * -1
-            );
+            var square = this.getSquare(atX,atY, p2x,p2y);
+            mineX = square[0];
+            mineY = square[1];
         }
 
         else {
             mineX = atX;
             mineY = atY;
         }
-
-        mineX = this.confine(mineX);
-        mineY = this.confine(mineY);
 
         var x = Math.abs(this.x) + mineX; //  - this.cellSizeHalf;
         var y = Math.abs(this.y) + mineY; // - this.cellSizeHalf;
@@ -158,7 +202,7 @@ define(['jquery'], function (jquery) {
         var imgd8 = new Uint8Array( imgd.data.buffer );
         var r=-1, g=-1, b=-1;
         for (var i=0; i<imgd8.length; i+=4){
-            if (imgd8[i+3] < this.transparentThreshold) continue;
+            if (imgd8[i+3] <= this.transparentThreshold) continue;
             r += imgd8[i];
             g += imgd8[i+1];
             b += imgd8[i+2];
@@ -220,22 +264,46 @@ define(['jquery'], function (jquery) {
     Land.prototype.isClear = function (x,y, w,h, debug){
         x = (this.x * -1) + x;
         y = (this.y * -1) + y;
+
         var imgd = this.ctx.getImageData( x, y, w, h );
         var imgd8 = new Uint8Array( imgd.data.buffer );
         var clear = 0;
         var shouldBeClear = imgd8.length/8;
 
-        // Check only alternate transparent pixels
+        if (debug) console.log(imgd8)
+
         var px = 0;
-        for (var i=3; i < imgd8.length; i+=8){
-            if (imgd8[i] < 127){
+        for (var i=3; i < imgd8.length; i+=4){
+            if (imgd8[i] <= this.transparentThreshold){
                 clear ++;
                 if (clear === shouldBeClear) break;
             }
             px ++;
         }
 
-        return clear === shouldBeClear; // Clear if 50% clear
+        if (debug){
+            this.debug = [x,y,w,h];
+            console.log('Clear / Should Be = ', clear, shouldBeClear);
+        }
+
+        return clear >= shouldBeClear; // Clear if 50% clear
+    }
+
+    Land.prototype.grid = function (){
+        this.ctx.lineWidth = 1;
+        this.ctx.style = '';
+        for (var y=0; y<this.height; y+=this.cellSize ){
+            this.ctx.moveTo(0,y);
+            this.ctx.lineTo(this.width,y);
+            this.ctx.stroke();
+        }
+
+       for (var x=0; x<this.width; x+=this.cellSize ){
+            this.ctx.moveTo(x,0);
+            this.ctx.lineTo(x, this.height);
+            this.ctx.stroke();
+       }
+
     }
 
     return Land;

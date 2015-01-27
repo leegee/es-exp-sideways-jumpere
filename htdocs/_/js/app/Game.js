@@ -12,8 +12,8 @@ define(['jquery'], function (jquery) {
         var vendors = ['ms', 'moz', 'webkit', 'o'];
         for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
             window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-            window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame']
-                                       || window[vendors[x]+'CancelRequestAnimationFrame'];
+            window.cancelAnimationFrame  = window[vendors[x]+'CancelAnimationFrame']
+                                        || window[vendors[x]+'CancelRequestAnimationFrame'];
         }
 
         if (!window.requestAnimationFrame)
@@ -50,7 +50,8 @@ define(['jquery'], function (jquery) {
             land: this.land
         });
         this.hud        = new args.Hud({
-            numberOfColours: this.player.numberOfColours
+            numberOfColours: this.player.numberOfColours,
+            mode:            this.player.mode
         });
 
         // this.land.onReady( this, this.run );
@@ -124,7 +125,10 @@ define(['jquery'], function (jquery) {
                     );
                 }
                 else {
-                    self.player.build();
+                    var done = self.player.startBuilding( self.pageX, self.pageY, self.hud.getClr() );
+                    if (done){
+                        self.hud.decreaseClr();
+                    }
                 }
             }
             return false;
@@ -141,11 +145,20 @@ define(['jquery'], function (jquery) {
             e = e || window.e;
             e.preventDefault() || e.stopPropagation();
             var clrKey = e.charCode - 48;
-            if ( clrKey > 0 && clrKey <= self.player.numberOfColours + 1){
-                self.player.setClr( clrKey );
+            if (e.charCode === 32 ){
+                self.player.toggleMode();
+                self.hud.setMode( self.player.mode );
+                console.log('mode=',self.player.mode);
+            }
+            else if (clrKey > 0 && clrKey <= self.player.numberOfColours + 1){
                 self.hud.setClr( clrKey );
-            } else {
-                console.log(e.charCode);
+            }
+
+            else if (e.charCode==167){ // §
+                self.player.debug = ! self.player.debug;
+            }
+            else {
+                console.log('key=',e.charCode);
             }
             return false;
         };
@@ -186,7 +199,7 @@ define(['jquery'], function (jquery) {
         document.onmousedown   = null;
         document.onContextMenu = null;
         this.playing = false;
-    }
+    };
 
     Game.prototype.tick = function (args) {
         this.player.setMove( this.pageX, this.pageY );

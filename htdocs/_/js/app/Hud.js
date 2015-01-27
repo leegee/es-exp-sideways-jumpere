@@ -7,6 +7,7 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
         var self = this;
         this.rgb = [];
         this.clr = null;
+        this.mode = args.mode;
         this.numberOfColours = args.numberOfColours;
         this.el = {
             clrs: [],
@@ -28,7 +29,13 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
                 self.el.palette.append( self.el.clrs[i] );
                 i++;
             }
+
+            self.setMode( self.mode );
         });
+    };
+
+    Hud.prototype.getClr = function (index) {
+        return this.el.clrs[ this.clr ].css('color');
     };
 
     Hud.prototype.setClr = function (index) {
@@ -40,6 +47,13 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
             this.clr = index;
             this.el.clrs[ this.clr ].addClass('highlight');
             console.log('Select clr index ', this.clr);
+        }
+    };
+
+    Hud.prototype.decreaseClr = function () {
+        var v = parseInt( this.el.clrs[ this.clr ].text() );
+        if (v>0){
+            this.el.clrs[ this.clr ].text( v-1 )
         }
     };
 
@@ -86,6 +100,12 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
 
         return [h, s, l];
     }
+
+    Hud.prototype.setMode = function (mode) {
+        if (this.el.mode) this.el.mode.removeClass('highlight');
+        this.el.mode = jquery('#'+mode);
+        this.el.mode.addClass('highlight');
+    };
 
     return Hud;
 });

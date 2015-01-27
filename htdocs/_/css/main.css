@@ -92,7 +92,7 @@ textarea {
    ========================================================================== */
 
 
-
+#grid,
 #land,
 #player {
     position: absolute;
@@ -100,6 +100,10 @@ textarea {
     left: 0;
     padding: 0;
     margin: 0;
+}
+
+#grid {
+    z-index: 100;
 }
 
 #land {
@@ -143,22 +147,26 @@ textarea {
 #clrs li {
     width: auto;
     padding: 4pt;
-    background: none;
-}
-#mode li > *,
-#clrs li > * {
-    margin-left: 1em;
+    background: transparent;
 }
 
 #clrs li {
+    background: transparent;
     display: inline-block;
+    padding-left: 1em;
+    padding-right: 1em;
+    border: 1px solid transparent;
+}
+
+#mode li > *,
+#clrs li > * {
+    display: inline-block;
+    background: transparent;
 }
 
 .highlight {
-    background: yellow;
-}
-.no-highlight {
-    background: none;
+    background: rgba(255,255,0,0.75);
+    border: 1px solid yellow;
 }
 
 /* ==========================================================================

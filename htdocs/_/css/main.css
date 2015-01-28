@@ -91,19 +91,15 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-
-#grid,
 #land,
-#player {
+#air,
+#player,
+#grid {
     position: absolute;
     top: 0;
     left: 0;
     padding: 0;
     margin: 0;
-}
-
-#grid {
-    z-index: 100;
 }
 
 #land {
@@ -114,6 +110,15 @@ textarea {
     z-index: 50;
     background: transparent;
 }
+
+#air {
+    z-index: 60;
+}
+
+#grid {
+    z-index: 100;
+}
+
 
 /** HUD **/
 

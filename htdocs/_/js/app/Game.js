@@ -43,7 +43,8 @@ define(['jquery'], function (jquery) {
         this.xMoveRate  = 2;
         this.yFallRate  = 2;
         this.yJumpRate  = 2;
-        self.playing    = false;
+        this.playing    = false;
+        this.air        = null;
 
         this.land       = new args.Land();
         this.player     = new args.Player({
@@ -59,6 +60,12 @@ define(['jquery'], function (jquery) {
         .then(
             function () {
                 console.log('Loaded Land');
+                self.air = new args.Air({
+                    width:  self.land.width,
+                    height: self.land.height
+                })
+                self.air.night(0.95);
+                self.air.light( self.player.x, self.player.y, 200);
                 self.run();
             }
         )

@@ -12,7 +12,7 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
         this.ready  = false;
         this.cellSize = 20;
         this.cellSizeHalf = this.cellSize/2;
-        this.transparentThreshold = 127;
+        this.transparentThreshold = 200;
         this.saturationPc = 70;
         this.lightnessPc  = 70;
         this.el     = null;
@@ -26,7 +26,7 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
         this.bounds = {
             left: null,
             right: null
-        }
+        };
         this.scale = {
             x: 1,
             y: 1
@@ -57,11 +57,11 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
                 self.height = self.img.height + (2 * self.sides.left);
 
                 self.el = jquery(
-                    '<canvas id="land"'
-                    +'width="'+self.width+'" height="'+self.height+'" '
-                    +'style="'
-                        +'width:'+self.width+'px;height:'+self.height+'px;'
-                    +'"/>'
+                    '<canvas id="land"' +
+                    'width="'+self.width+'" height="'+self.height+'" ' +
+                    'style="' +
+                        'width:'+self.width+'px;height:'+self.height+'px;'+
+                    '"/>'
                 );
                 jquery( document.body ).append( self.el );
                 self.dom = self.el.get(0);
@@ -202,7 +202,9 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
         var imgd8 = new Uint8Array( imgd.data.buffer );
         var r=-1, g=-1, b=-1;
         for (var i=0; i<imgd8.length; i+=4){
-            if (imgd8[i+3] <= this.transparentThreshold) continue;
+            if (imgd8[i+3] <= this.transparentThreshold) {
+                continue;
+            }
             r += imgd8[i];
             g += imgd8[i+1];
             b += imgd8[i+2];
@@ -253,7 +255,7 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
         }
 
         return rv;
-    }
+    };
 
     Land.prototype.confine = function (p) {
         var rv = (parseInt( p / this.cellSize) * this.cellSize); // + this.cellSizeHalf;
@@ -270,7 +272,9 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
         var clear = 0;
         var shouldBeClear = imgd8.length/8;
 
-        if (debug) console.log(imgd8)
+        if (debug) {
+            console.log(imgd8);
+        }
 
         var px = 0;
         for (var i=3; i < imgd8.length; i+=4){
@@ -287,7 +291,38 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
         }
 
         return clear >= shouldBeClear; // Clear if 50% clear
-    }
+    };
+
+    Land.prototype.night = function () {
+        var alpha = (this.transparentThreshold/255) - 0.05;
+        alert(alpha);
+        this.ctx.save();
+        this.ctx.globalCompositeOperation = "multiply";
+        this.ctx.fillStyle = "rgba(0,0,0,"+( alpha )+")";
+        this.ctx.fillRect(0, 0, this.width, this.height);
+        this.ctx.restore();
+    };
+
+    Land.prototype.light = function (x,y,lightSize) {
+
+        this.ctx.save();
+
+        lightSize = lightSize || 250;
+        var radialGradient = this.ctx.createRadialGradient(
+            x + lightSize / 2,
+            y + lightSize / 2,
+            0,
+            x + lightSize / 2,
+            y + lightSize / 2,
+            lightSize / 2
+        );
+        radialGradient.addColorStop(0, "rgba(255, 165, 0, 0.7)");
+        radialGradient.addColorStop(1, "transparent");
+        this.ctx.globalCompositeOperation = "screen";
+        this.ctx.fillStyle = radialGradient;
+        this.ctx.fillRect(x, y, lightSize, lightSize);
+        this.ctx.restore();
+    };
 
     return Land;
 });

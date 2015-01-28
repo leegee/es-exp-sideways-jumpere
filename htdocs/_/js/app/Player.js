@@ -35,7 +35,9 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
     };
 
     Player.prototype.startBuilding = function (dirX, dirY, clr) {
-        if (this.building) return false;
+        if (this.building || !clr || typeof clr === 'undefined'){
+            return false;
+        }
         this.building = true;
         this.land.build(this.x, this.y, dirX, dirY, clr);
         var self = this;

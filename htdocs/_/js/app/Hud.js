@@ -34,7 +34,7 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
         });
     };
 
-    Hud.prototype.getClr = function (index) {
+    Hud.prototype.getClr = function () {
         return this.el.clrs[ this.clr ].css('color');
     };
 

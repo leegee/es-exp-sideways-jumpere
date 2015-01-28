@@ -115,10 +115,10 @@ define(['jquery'], function (jquery) {
         document.onmousedown = function handleMouseDown (e) {
             e = e || window.e;
             e.preventDefault() || e.stopPropagation();
-            if (e.which===1 || e.button==1){
-                self.player.startJump();
-            }
-            else {
+            // if (e.which===1 || e.button==1){
+            //     self.player.startJump();
+            // }
+            // else {
                 if (self.player.mode === 'dig'){
                     self.hud.addRgb(
                         self.player.startMining( self.pageX, self.pageY )
@@ -130,7 +130,7 @@ define(['jquery'], function (jquery) {
                         self.hud.decreaseClr();
                     }
                 }
-            }
+            // }
             return false;
         };
 
@@ -145,7 +145,24 @@ define(['jquery'], function (jquery) {
             e = e || window.e;
             e.preventDefault() || e.stopPropagation();
             var clrKey = e.charCode - 48;
-            if (e.charCode === 32 ){
+            // w    119
+            if (e.charCode === 119){
+                self.player.startJump();
+            }
+            // a    97
+            else if (e.charCode === 97){
+                self.player.setMove( -1, 0 );
+            }
+            // s    115, d 100
+            else if (e.charCode === 115 || e.charCode === 100){
+                self.player.setMove( 1, 0 );
+            }
+            // x    120, z 122
+            else if (e.charCode === 120 || e.charCode === 122){
+
+            }
+
+            else if (e.charCode === 32 ){
                 self.player.toggleMode();
                 self.hud.setMode( self.player.mode );
                 console.log('mode=',self.player.mode);
@@ -202,8 +219,8 @@ define(['jquery'], function (jquery) {
     };
 
     Game.prototype.tick = function (args) {
-        this.player.setMove( this.pageX, this.pageY );
-        this.player.collisionDetection_and_gravity();
+        // this.player.setMove( this.pageX, this.pageY );
+        this.player.tick();
         this.land.moveBy(
             this.player.moveby.x * this.player.dir.x,
             this.player.moveby.y * this.player.dir.y

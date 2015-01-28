@@ -82,6 +82,7 @@ define(['jquery'], function (jquery) {
     }
 
     Sprite.prototype.setMove = function (x, y){}
+    Sprite.prototype.setMoveByMouse = function (x,y) {}
 
     Sprite.prototype.moveBy = function (x, y) {
         if (!x && !y) return;
@@ -125,7 +126,15 @@ define(['jquery'], function (jquery) {
         this.dir.y = 0;
     };
 
-    Sprite.prototype.collisionDetection_and_gravity = function () {
+    Sprite.prototype.tick = function () {
+        if (this.requestStop){
+            var x = this.x + this.dir.x * this.offset.x;
+            if (Math.abs( x - this.land.confine(x)) <= this.moveby.x){
+                this.dir.x = 0;
+                this.requestStop = false;
+            }
+        }
+
         if (! this.jumpStartTime){
             this.checkMoveBelow();
         }
@@ -157,7 +166,7 @@ define(['jquery'], function (jquery) {
                 }
             }
         }
-        console.log('Leave with ', this.dir.y, this.falling);
+        // console.log('Leave with ', this.dir.y, this.falling);
     };
 
     Sprite.prototype.checkMoveAbove = function () {
@@ -183,12 +192,12 @@ define(['jquery'], function (jquery) {
             this.debug
         );
         if (this.clr.below){
-            console.log('fall');
+            // console.log('fall');
             this.dir.y = 1;
             this.falling = true;
         } else {
             if (this.debug){
-                console.log('land below');
+                // console.log('land below');
                 this.land.ctx.fillStyle = '#FFFF00';
                 this.land.ctx.fillRect(
                     this.land.debug[0],

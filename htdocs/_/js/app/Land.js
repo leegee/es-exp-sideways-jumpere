@@ -141,11 +141,11 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
     Land.prototype.getSquare = function (atX,atY, p2x,p2y) {
         var angleRad = Math.atan2(atY - p2y, atX - p2x);
         var x = atX + parseInt(
-            this.cellSize * Math.cos( angleRad ) * -1
-        ),
+                this.cellSize * Math.cos( angleRad ) * -1
+            ),
             y = atY + parseInt(
-            this.cellSize * Math.sin( angleRad ) * -1
-        );
+                this.cellSize * Math.sin( angleRad ) * -1
+            );
 
         return [this.confine(x), this.confine(y)];
     };

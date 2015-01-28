@@ -66,6 +66,8 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
             this.width,
             this.height
         );
+        this.ctx.fillStyle = 'rgb(0,0,255)';
+        this.ctx.fillRect(this.x, this.y, 1, 1);
     };
 
     Player.prototype.toggleMode = function (mode) {
@@ -88,6 +90,25 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
     };
 
     Player.prototype.setMove = function (dirX, dirY){
+        var self = this;
+        if (dirX > 0) {
+            this.dir.x = 1;
+        }
+        else if (dirX < 0){
+            this.dir.x = -1;
+        }
+
+        if (dirX !== 0) {
+            setTimeout(
+                function (){
+                    self.requestStop = true;
+                },
+                300
+            );
+        }
+    };
+
+    Player.prototype.setMoveByMouse = function (dirX, dirY){
         // Set / change direction
         if (dirX >= this.land.sides.right){
             this.dir.x = 1;
@@ -108,7 +129,7 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
             }
         }
 
-        console.log('dir x = ', this.dir.x, this.requestStop);
+        // console.log('dir x = ', this.dir.x, this.requestStop);
 
         // if (this.jumpStartTime){
         //     // this.dir.y = (100 - duration/10) / 5;

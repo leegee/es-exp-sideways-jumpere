@@ -25,15 +25,15 @@ define(['jquery'], function (jquery) {
         this.dom = this.el.get(0);
         this.ctx = this.dom.getContext('2d');
 
-        this.ctx.lineWidth = 1;
+        this.ctx.lineWidth = '1';
         this.ctx.style = '#000000';
-        for (var y=0; y<this.height; y+=this.cellSize ){
+        for (var y=this.cellSize; y<this.height; y+=this.cellSize ){
             this.ctx.moveTo(0,y);
             this.ctx.lineTo(this.width,y);
             this.ctx.stroke();
         }
 
-       for (var x=0; x<this.width; x+=this.cellSize ){
+       for (var x=this.cellSize; x<this.width; x+=this.cellSize ){
             this.ctx.moveTo(x,0);
             this.ctx.lineTo(x, this.height);
             this.ctx.stroke();

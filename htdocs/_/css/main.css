@@ -127,7 +127,7 @@ textarea {
     z-index: 100;
     position: absolute;
     top: 5%;
-    right: 10%;
+    right: 1%;
     width: auto;
     height: auto;
     background: rgba(255,255,255,0.5);
@@ -144,7 +144,7 @@ textarea {
     font-size: 12pt;
     border: 2pt solid white;
     padding: 4pt;
-    left: 5%;
+    left: 1%;
     right: auto;
 }
 

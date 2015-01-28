@@ -79,11 +79,11 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
                 );
                 self.ctx.stroke();
 
-                self.grid = new Grid({
-                    cellSize: self.cellSize,
-                    width: self.width,
-                    height: self.height
-                });
+                // self.grid = new Grid({
+                //     cellSize: self.cellSize,
+                //     width: self.width,
+                //     height: self.height
+                // });
 
                 self.bounds.left  = self.sides.left;
                 self.bounds.right = (self.width + self.sides.left) * -1;

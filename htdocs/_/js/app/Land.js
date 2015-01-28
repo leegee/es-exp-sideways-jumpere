@@ -289,22 +289,5 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
         return clear >= shouldBeClear; // Clear if 50% clear
     }
 
-    Land.prototype.grid = function (){
-        this.ctx.lineWidth = 1;
-        this.ctx.style = '';
-        for (var y=0; y<this.height; y+=this.cellSize ){
-            this.ctx.moveTo(0,y);
-            this.ctx.lineTo(this.width,y);
-            this.ctx.stroke();
-        }
-
-       for (var x=0; x<this.width; x+=this.cellSize ){
-            this.ctx.moveTo(x,0);
-            this.ctx.lineTo(x, this.height);
-            this.ctx.stroke();
-       }
-
-    }
-
     return Land;
 });

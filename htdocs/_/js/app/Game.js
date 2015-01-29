@@ -62,10 +62,9 @@ define(['jquery'], function (jquery) {
                 console.log('Loaded Land');
                 self.air = new args.Air({
                     width:  self.land.width,
-                    height: self.land.height
+                    height: self.land.height,
+                    getLightPosition: function () { return self.player.getXY(); }
                 })
-                self.air.night(0.95);
-                self.air.light( self.player.x, self.player.y, 200);
                 self.run();
             }
         )
@@ -112,6 +111,7 @@ define(['jquery'], function (jquery) {
 
     Game.prototype.destroy = function () {
         this.removeInputListeners();
+        this.air.destroy();
         window.cancelAnimationFrame( this.animationId );
     };
 

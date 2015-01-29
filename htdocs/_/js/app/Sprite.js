@@ -67,6 +67,10 @@ define(['jquery'], function (jquery) {
         // this.render();
     };
 
+    Sprite.prototype.getXY = function () {
+        return [this.x, this.y];
+    };
+
     Sprite.prototype.setEl = function () {
         this.el = jquery(
             '<canvas id="player" '

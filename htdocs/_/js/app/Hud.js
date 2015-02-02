@@ -9,15 +9,26 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
         this.clr = null;
         this.mode = args.mode;
         this.numberOfColours = args.numberOfColours;
+        this.keys = {
+            build: null,
+            dig: null
+        };
         this.el = {
             clrs: [],
+            inventory: null,
             hud: null,
             mode: null
         };
+        this.inventory = {
+        };
 
         jquery.get('_/templates/hud.html', function (template) {
-            self.el.hud = Mustache.render(template, {});;
-            jquery( document.body ).append( self.el.hud );
+            jquery( document.body ).append(
+                Mustache.render(template, {})
+            );
+            self.el.inventory = jquery('#inventory');
+            self.el.inventory.hide();
+            self.el.hud = jquery('#hud');
             self.el.palette = jquery('#palette');
             var i = 0;
             for (var hue=0; hue<360; hue+=(360 / self.numberOfColours)){
@@ -30,23 +41,35 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
                 i++;
             }
 
+            self.keys.dig = ++i;
+            self.keys.build = ++i;
+            self.el.palette.append(
+                '<li id="dig">⟰</li>'  +
+                '<li id="build">⟱</li>'
+            );
+
             self.setMode( self.mode );
         });
     };
 
     Hud.prototype.getClr = function () {
-        return this.el.clrs[ this.clr ].css('color');
+        if (typeof this.clr === 'undefined'){
+            return false;
+        }
+        var rv = this.el.clrs[ this.clr ].css('color');
+        console.log('Hud.getClr for %d = %d',this.clr, rv);
+        return rv;
     };
 
     Hud.prototype.setClr = function (index) {
         index --;
         if (index <= this.numberOfColours){
+            console.log('Select clr index ', index, ' to ', this.clr);
             if (this.clr !== null){
                 this.el.clrs[ this.clr ].removeClass('highlight');
             }
             this.clr = index;
             this.el.clrs[ this.clr ].addClass('highlight');
-            console.log('Select clr index ', this.clr);
         }
     };
 
@@ -102,9 +125,18 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
     }
 
     Hud.prototype.setMode = function (mode) {
-        if (this.el.mode) this.el.mode.removeClass('highlight');
+        if (this.el.mode) {
+            this.el.mode.removeClass('highlight');
+        }
         this.el.mode = jquery('#'+mode);
         this.el.mode.addClass('highlight');
+        console.debug(this.el.mode);
+    };
+
+    Hud.prototype.toggleInventory = function () {
+        this.el.inventory.toggle();
+        if (this.el.inventory.css('display') !== 'none'){
+        }
     };
 
     return Hud;

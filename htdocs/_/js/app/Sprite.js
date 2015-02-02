@@ -155,8 +155,19 @@ define(['jquery'], function (jquery) {
             var clrBeside = this.land.isClear(
                 x, y,
                 this.moveby.x,
-                1
+                4,
+                this.debug
             );
+           if (this.debug){
+                // console.log('land below');
+                this.land.ctx.fillStyle = '#FFFF00';
+                this.land.ctx.fillRect(
+                    this.land.debug[0],
+                    this.land.debug[1],
+                    this.land.debug[2],
+                    this.land.debug[3]
+                );
+           }
 
             if (! clrBeside){
                 this.dir.x = 0;
@@ -170,6 +181,8 @@ define(['jquery'], function (jquery) {
                 }
             }
         }
+
+        this.debug = false;
         // console.log('Leave with ', this.dir.y, this.falling);
     };
 
@@ -214,8 +227,6 @@ define(['jquery'], function (jquery) {
             this.dir.y = 0;
             this.falling = 0;
         }
-
-        this.debug = false;
     }
 
     return Sprite;

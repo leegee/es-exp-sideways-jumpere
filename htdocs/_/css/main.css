@@ -94,7 +94,8 @@ textarea {
 #land,
 #air,
 #player,
-#grid {
+#grid,
+#cursors {
     position: absolute;
     top: 0;
     left: 0;
@@ -112,6 +113,10 @@ textarea {
 }
 
 #air {
+    z-index: 80;
+}
+
+#cursors {
     z-index: 60;
 }
 
@@ -122,56 +127,59 @@ textarea {
 
 /** HUD **/
 
-#mode,
 #palette {
+    display: block;
     z-index: 100;
     position: absolute;
-    top: 5%;
+    top: 1%;
     right: 1%;
     width: auto;
     height: auto;
-    background: rgba(255,255,255,0.5);
+    padding: 1em;
+    border: 2pt solid white;
+    background: rgba(255,255,255,0.75);
     font-family: "Courier New",Courier,Mono;
     font-weight: bold;
+    font-size: 10pt;
 }
 
-#palette {
-    display: block;
+#palette li {
     font-size: 12pt;
-    padding: 1em;
-}
-#mode {
-    font-size: 12pt;
-    border: 2pt solid white;
-    padding: 4pt;
-    left: 1%;
-    right: auto;
-}
-
-#mode li,
-#clrs li {
     width: auto;
-    padding: 4pt;
-    background: transparent;
+    float: left;
+    margin: 0; padding: 0;
+    margin-left: 2em;
+    margin-right: 2em;
 }
-
-#clrs li {
-    background: transparent;
-    display: inline-block;
-    padding-left: 1em;
-    padding-right: 1em;
-    border: 1px solid transparent;
+#palette li:last-child {
+    margin-right: 0;
 }
 
 #mode li > *,
-#clrs li > * {
+#palette li > * {
     display: inline-block;
-    background: transparent;
 }
 
 .highlight {
-    background: rgba(255,255,0,0.75);
-    border: 1px solid yellow;
+    border: 2px solid black;
+}
+
+#inventory {
+    z-index: 255;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: navy;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    color: white;
+    font-size: 12pt;
+    padding: 1em;
+}
+
+#inventory h1 {
+    margin-bottom: 1em;
 }
 
 /* ==========================================================================

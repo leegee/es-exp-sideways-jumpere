@@ -6,7 +6,7 @@ define( function () {
         console.debug('Air.constructor enter ', arguments);
         var self    = this;
 
-        this.dayLength = args.dayLength || 10000;
+        this.dayLength = args.dayLength || (60 * 1000);
         this.width     = args.width;
         this.height    = args.height;
         this.lightRad  = args.lightRad || 200;

@@ -60,6 +60,15 @@ define(['jquery'], function (jquery) {
         .then(
             function () {
                 console.log('Loaded Land');
+                self.cursors = new args.Cursors({
+                    cellSize: self.land.cellSize,
+                    width:  self.land.width,
+                    height: self.land.height,
+                    player: {
+                        widthHalf: self.player.width / 2,
+                        heightHalf: self.player.height / 2
+                    }
+                });
                 self.air = new args.Air({
                     width:  self.land.width,
                     height: self.land.height,
@@ -70,7 +79,7 @@ define(['jquery'], function (jquery) {
         )
         .catch(
             function (e){
-                console.error(e)
+                console.error(e);
                 throw(e);
             }
         )
@@ -127,8 +136,13 @@ define(['jquery'], function (jquery) {
             // }
             // else {
                 if (self.player.mode === 'dig'){
+                    console.log('mine: curosr ', self.cursors.x, self.cursors.y );
+                    console.log('mine: page   ', self.pageX, self.pageY );
                     self.hud.addRgb(
-                        self.player.startMining( self.pageX, self.pageY )
+                        self.player.startMining(
+                        //    self.pageX, self.pageY
+                            self.cursors.x, self.cursors.y
+                        )
                     );
                 }
                 else {
@@ -147,13 +161,17 @@ define(['jquery'], function (jquery) {
             return false;
         };
 
-        // Pre cursor keys from moving the page:
         document.onkeypress = function handleKeyPress (e) {
             e = e || window.e;
             e.preventDefault() || e.stopPropagation();
             var clrKey = e.charCode - 48;
+
+            // e
+            if (e.charCode === 101){
+                self.hud.toggleInventory();
+            }
             // w    119
-            if (e.charCode === 119){
+            else if (e.charCode === 119){
                 self.player.startJump();
             }
             // a    97
@@ -166,15 +184,26 @@ define(['jquery'], function (jquery) {
             }
             // x    120, z 122
             else if (e.charCode === 120 || e.charCode === 122){
+            }
 
+            else if (clrKey === self.hud.keys.dig ){
+                console.debug('dig');
+                self.player.setMode('dig');
+                self.hud.setMode( self.player.mode );
+            }
+
+            else if (clrKey === self.hud.keys.build ){
+                console.debug('build');
+                self.player.setMode('build');
+                self.hud.setMode( self.player.mode );
             }
 
             else if (e.charCode === 32 ){
                 self.player.toggleMode();
                 self.hud.setMode( self.player.mode );
-                console.log('mode=',self.player.mode);
             }
-            else if (clrKey > 0 && clrKey <= self.player.numberOfColours + 1){
+            else if (clrKey > 0 && clrKey <= self.player.numberOfColours){
+                console.debug('colour key ', clrKey);
                 self.hud.setClr( clrKey );
             }
 
@@ -182,7 +211,7 @@ define(['jquery'], function (jquery) {
                 self.player.debug = ! self.player.debug;
             }
             else {
-                console.log('key=',e.charCode);
+                console.log('key=%d, clrKey=%d',e.charCode, clrKey);
             }
             return false;
         };
@@ -213,6 +242,19 @@ define(['jquery'], function (jquery) {
             self.pageX = e.pageX;
             self.pageY = e.pageY;
 
+            if (Math.abs(self.pageX - self.player.x) < (self.land.cellSize*2) + self.player.offset.x
+             && Math.abs(self.pageY - self.player.y) < (self.land.cellSize*3) + self.player.offset.y
+            ){
+                self.cursors.render(
+                    self.land.getSquare(
+                        self.pageX, self.pageY,
+                        self.player.x, self.player.y
+                    )
+                );
+            } else {
+                self.cursors.hide();
+            }
+
             return false;
         };
     };
@@ -233,6 +275,7 @@ define(['jquery'], function (jquery) {
             this.player.moveby.y * this.player.dir.y
         );
     };
+
 
     return Game;
 });

@@ -4,10 +4,11 @@ define( [
     'app/Land',
     'app/Player',
     'app/Hud',
-    'app/Air'
+    'app/Air',
+    'app/Cursors'
 ],
 function (
-    jquery, Game, Land, Player, Hud, Air
+    jquery, Game, Land, Player, Hud, Air, Cursors
 ) {
     jquery(document).ready( function () {
         jquery('body').html('');
@@ -18,7 +19,8 @@ function (
             Land:   Land,
             Player: Player,
             Hud:    Hud,
-            Air:    Air
+            Air:    Air,
+            Cursors: Cursors
         });
     });
 });

@@ -27,23 +27,27 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
     Player.prototype.loaded = function () {
         this.x = parseInt( (window.innerWidth/2) - (this.width/2) );
         this.y = parseInt( (window.innerHeight/2) - (this.height/2) );
-        this.width = this.land.cellSize/2;
-        this.height = this.land.cellSize;
+        this.width = this.land.cellSize  * 2;
+        this.height = this.land.cellSize * 4;
         this.offset.x = this.width/2;
         this.offset.y = this.height/2;
         this.render();
     };
 
     Player.prototype.startBuilding = function (dirX, dirY, clr) {
+        console.debug('Player.startBuilding %d, %d set to %d', dirX, dirY, clr);
         if (this.building || !clr || typeof clr === 'undefined'){
+            console.debug('No');
             return false;
         }
+
         this.building = true;
         this.land.build(this.x, this.y, dirX, dirY, clr);
         var self = this;
         setTimeout( function () {
             self.building = false;
         }, 300);
+        return true;
     };
 
     Player.prototype.startMining = function (dirX, dirY) {
@@ -51,7 +55,8 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
         this.mining = true;
         // this.land.mine(this.x, this.y);
 
-        var rgb = this.land.mine(this.x, this.y, dirX, dirY);
+        // var rgb = this.land.mine(this.x, this.y, dirX, dirY);
+        var rgb = this.land.mine( dirX, dirY );
         var self = this;
         setTimeout( function () {
             self.mining = false;
@@ -68,7 +73,7 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
             this.width,
             this.height
         );
-        this.ctx.fillStyle = 'rgb(0,0,255)';
+        this.ctx.fillStyle = 'rgb(255,255,255)';
         this.ctx.fillRect(this.x, this.y, 1, 1);
     };
 

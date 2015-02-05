@@ -140,7 +140,7 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
 
     Land.prototype.getSquare = function (atX,atY, p2x,p2y) {
         var angleRad = Math.atan2(atY - p2y, atX - p2x);
-        console.log('Angle=',(angleRad)*180/Math.PI);
+        // console.log('Angle=',(angleRad)*180/Math.PI);
         var x = atX + (
                 this.cellSize * Math.cos( angleRad ) * -1
             ),
@@ -152,30 +152,14 @@ define(['jquery', 'app/Grid'], function (jquery, Grid) {
     };
 
 
-    Land.prototype.build = function (atX,atY, p2x,p2y, rgb) {
-        var buildX, buildY;
-
-        if (p2x){
-            var square = this.getSquare(atX,atY, p2x,p2y);
-            buildX = square[0];
-            buildY = square[1];
-        }
-
-        else {
-            buildX = atX;
-            buildY = atY;
-        }
-
-        var x = Math.abs(this.x) + buildX;
-        var y = Math.abs(this.y) + buildY;
-
+    Land.prototype.build = function (x,y, rgb) {
+        var x = Math.abs(this.x) + x;
+        var y = Math.abs(this.y) + y;
         // if (this.isClear( x,y, this.cellSize, this.cellSize)){
         //     console.log("OK");
         // }
-
         this.ctx.fillStyle = rgb;
         this.ctx.fillRect( x, y, this.cellSize, this.cellSize );
-
         return true;
     };
 

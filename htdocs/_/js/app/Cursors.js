@@ -40,8 +40,8 @@ define( function () {
         this.ctx.globalCompositeOperation = "source-over";
         this.x = x;
         this.y = y;
-        this.ctx.setStyle = '#32cd32DD';
-        this.ctx.strokeRect( this.x, this.y, this.cellSize, this.cellSize );
+        this.ctx.fillStyle = 'rgba(50,255,50,0.4)';//#32cd32
+        this.ctx.fillRect( this.x, this.y, this.cellSize, this.cellSize );
         this.ctx.restore();
     };
 

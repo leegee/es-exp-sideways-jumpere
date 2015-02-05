@@ -117,7 +117,7 @@ textarea {
 }
 
 #cursors {
-    z-index: 60;
+    z-index: 100;
 }
 
 #grid {
@@ -178,8 +178,28 @@ textarea {
     padding: 1em;
 }
 
+#inventory .info-wide {
+    width: 500pt;
+    left: -50%;
+    margin-left: 250pt;
+}
+
 #inventory h1 {
     margin-bottom: 1em;
+}
+
+#inventory_clrs {
+    display: block;
+    list-style-type: none;
+}
+
+#inventory_clrs li {
+    display: inline-block;
+    list-style: none;
+    width: 3em;
+    height: 3em;
+    margin: 1em;
+    text-align: center;
 }
 
 /* ==========================================================================

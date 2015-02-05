@@ -34,15 +34,20 @@ define(['jquery','app/Sprite'], function (jquery,Sprite) {
         this.render();
     };
 
-    Player.prototype.startBuilding = function (dirX, dirY, clr) {
-        console.debug('Player.startBuilding %d, %d set to %d', dirX, dirY, clr);
-        if (this.building || !clr || typeof clr === 'undefined'){
-            console.debug('No');
+    Player.prototype.startBuilding = function (x, y, clr) {
+        console.debug('Player.startBuilding %d, %d set to %d', x, y, clr);
+        if (this.building){
+            console.log('Already building');
+            return false;
+        }
+
+        if (!clr || typeof clr === 'undefined'){
+            console.debug('No colour');
             return false;
         }
 
         this.building = true;
-        this.land.build(this.x, this.y, dirX, dirY, clr);
+        this.land.build(x, y, clr);
         var self = this;
         setTimeout( function () {
             self.building = false;

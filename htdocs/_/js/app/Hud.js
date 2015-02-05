@@ -8,11 +8,9 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
         this.rgb = [];
         this.clr = null;
         this.mode = args.mode;
+        this.setExternalMode = args.setMode;
         this.numberOfColours = args.numberOfColours;
-        this.keys = {
-            build: null,
-            dig: null
-        };
+        this.keys = {};
         this.el = {
             clrs: [],
             inventory: null,
@@ -20,6 +18,8 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
             mode: null
         };
         this.inventory = {
+            clrs: [],
+            visible: false
         };
 
         jquery.get('_/templates/hud.html', function (template) {
@@ -27,13 +27,14 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
                 Mustache.render(template, {})
             );
             self.el.inventory = jquery('#inventory');
+            self.el.inventory.el = jquery('#inventory_clrs');
             self.el.inventory.hide();
             self.el.hud = jquery('#hud');
             self.el.palette = jquery('#palette');
             var i = 0;
             for (var hue=0; hue<360; hue+=(360 / self.numberOfColours)){
                 self.el.clrs[i] = jquery(
-                    '<li id="clr'+(i)+'" style="color:hsl('
+                    '<li data-index="'+i+'" class="clr clr'+(i)+'" style="background-color:hsl('
                     + parseInt(hue)
                     + ',80%,70%)">0</li>'
                 );
@@ -41,33 +42,34 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
                 i++;
             }
 
-            self.keys.dig = ++i;
-            self.keys.build = ++i;
-            self.el.palette.append(
-                '<li id="dig">⟰</li>'  +
-                '<li id="build">⟱</li>'
-            );
-
-            self.setMode( self.mode );
+            self.setMode( 'dig' );
         });
     };
 
+    // Get colour from inventory if available
+    // Return CSS colour or null if none available
     Hud.prototype.getClr = function () {
-        if (typeof this.clr === 'undefined'){
+        if (this.clr === null){
             return false;
         }
-        var rv = this.el.clrs[ this.clr ].css('color');
-        console.log('Hud.getClr for %d = %d',this.clr, rv);
+        var val = parseInt( this.el.clrs[ this.clr ].text() );
+        if (val == 0){
+            console.debug('Nothing for ', this.clr);
+            return null;
+        } else {
+            var rv = this.el.clrs[ this.clr ].css('background-color');
+            console.log('Hud.getClr for %d = %d',this.clr, rv);
+        }
         return rv;
     };
 
     Hud.prototype.setClr = function (index) {
-        index --;
+        console.log('setClr ', index);
         if (index <= this.numberOfColours){
-            console.log('Select clr index ', index, ' to ', this.clr);
             if (this.clr !== null){
                 this.el.clrs[ this.clr ].removeClass('highlight');
             }
+            console.log('Select clr index to ', index);
             this.clr = index;
             this.el.clrs[ this.clr ].addClass('highlight');
         }
@@ -125,6 +127,8 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
     }
 
     Hud.prototype.setMode = function (mode) {
+        console.log('setMode ', mode);
+        this.setExternalMode(mode);
         if (this.el.mode) {
             this.el.mode.removeClass('highlight');
         }
@@ -135,8 +139,44 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
 
     Hud.prototype.toggleInventory = function () {
         this.el.inventory.toggle();
-        if (this.el.inventory.css('display') !== 'none'){
+        if (this.el.inventory.css('display') === 'none'){
+            this.el.inventory.el.html('');
+            this.inventory.visible = false;
+            return;
         }
+
+        this.inventory.visible = true;
+        var self = this;
+
+        // Colours for building:
+        var coloursOnScreen = 0;
+        for (var i=0; i<this.el.clrs.length; i++){
+            if (parseInt(this.el.clrs[i].text()) > 0){
+                coloursOnScreen ++;
+                var clr = this.el.clrs[i].clone();
+                this.el.inventory.el.append(clr);
+                clr.click(function (e){
+                    self.setClr( e.target.dataset.index );
+                    self.setMode('build');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                })
+            }
+        }
+
+        if (coloursOnScreen==0){
+            this.el.inventory.el.append(
+                '<p>You need to mine some colours before you can build!'
+            );
+            return;
+        }
+
+        // Digging:
+        jquery('#spade').click( function (e){
+            self.setMode('dig');
+        });
+
     };
 
     return Hud;

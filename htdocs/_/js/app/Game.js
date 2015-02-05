@@ -52,7 +52,10 @@ define(['jquery'], function (jquery) {
         });
         this.hud        = new args.Hud({
             numberOfColours: this.player.numberOfColours,
-            mode:            this.player.mode
+            mode:            this.player.mode,
+            setMode: function (str) {
+                self.player.mode = str;
+            }
         });
 
         // this.land.onReady( this, this.run );
@@ -129,6 +132,9 @@ define(['jquery'], function (jquery) {
         var self = this;
 
         document.onmousedown = function handleMouseDown (e) {
+            if (self.hud.inventory.visible){
+                return;
+            }
             e = e || window.e;
             e.preventDefault() || e.stopPropagation();
             // if (e.which===1 || e.button==1){
@@ -146,7 +152,11 @@ define(['jquery'], function (jquery) {
                     );
                 }
                 else {
-                    var done = self.player.startBuilding( self.pageX, self.pageY, self.hud.getClr() );
+                    var done = self.player.startBuilding(
+                        self.cursors.x,
+                        self.cursors.y,
+                        self.hud.getClr()
+                    );
                     if (done){
                         self.hud.decreaseClr();
                     }
@@ -188,23 +198,21 @@ define(['jquery'], function (jquery) {
 
             else if (clrKey === self.hud.keys.dig ){
                 console.debug('dig');
-                self.player.setMode('dig');
-                self.hud.setMode( self.player.mode );
+                self.hud.setMode( 'dig' );
             }
 
             else if (clrKey === self.hud.keys.build ){
                 console.debug('build');
-                self.player.setMode('build');
-                self.hud.setMode( self.player.mode );
+                self.hud.setMode( 'build' );
             }
 
-            else if (e.charCode === 32 ){
-                self.player.toggleMode();
-                self.hud.setMode( self.player.mode );
-            }
+            // else if (e.charCode === 32 ){
+            //     self.player.toggleMode();
+            //     self.hud.setMode( self.player.mode );
+            // }
             else if (clrKey > 0 && clrKey <= self.player.numberOfColours){
                 console.debug('colour key ', clrKey);
-                self.hud.setClr( clrKey );
+                self.hud.setClr( clrKey-1 );
             }
 
             else if (e.charCode==167){ // §

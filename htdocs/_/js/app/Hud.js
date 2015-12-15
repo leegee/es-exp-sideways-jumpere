@@ -148,6 +148,12 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
         this.inventory.visible = true;
         var self = this;
 
+        // Digging:
+        jquery('#spade').click( function (e){
+            self.setMode('dig');
+            self.toggleInventory();
+        });
+
         // Colours for building:
         var coloursOnScreen = 0;
         for (var i=0; i<this.el.clrs.length; i++){
@@ -160,6 +166,7 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
                     self.setMode('build');
                     e.preventDefault();
                     e.stopPropagation();
+                    self.toggleInventory();
                     return false;
                 })
             }
@@ -171,11 +178,6 @@ define(['jquery', 'mustache'], function (jquery, Mustache) {
             );
             return;
         }
-
-        // Digging:
-        jquery('#spade').click( function (e){
-            self.setMode('dig');
-        });
 
     };
 

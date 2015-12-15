@@ -146,7 +146,6 @@ define(['jquery'], function (jquery) {
                     console.log('mine: page   ', self.pageX, self.pageY );
                     self.hud.addRgb(
                         self.player.startMining(
-                        //    self.pageX, self.pageY
                             self.cursors.x, self.cursors.y
                         )
                     );

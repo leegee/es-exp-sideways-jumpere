@@ -11,3 +11,6 @@ Thumbs.db
 htdocs/img/passmore-fg.small.js
 htdocs/img/passmore-fg.small.png
 htdocs/_/js/vendor/bower_components/
+httpd.conf
+htdocs/img/orig/
+bin/map_maker.js

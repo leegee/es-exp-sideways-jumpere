@@ -10,8 +10,10 @@ const fs         = require('fs'),
       outputImageJs   = path.normalize( __dirname + '/../htdocs/img/passmore-fg.small.js'),
       BLACK      = 256,
       WHITE      = 257,
-      resizeTo   = 1000
+      ResizeTo   = 1000
 ;
+
+var   Scale      = null
 
 const processPixels = function (px) {
         var rvXy = [];
@@ -62,17 +64,47 @@ const processPixels = function (px) {
 
 // var writeStream = fs.createWriteStream( outputImagePath );
 
-console.log('Open', inputImagePath);
-
-gm( inputImagePath )
-.resize( resizeTo )
-.write( outputImagePath, function (err) {
-    if (err) throw err;
-    console.log('Wrote', outputImagePath);
-    getPixels( outputImagePath, 'image/png', function (err, px) {
-        if (err) throw err;
-        fs.writeFileSync( outputImageJs, JSON.stringify( processPixels(px)) );
-        console.log('Wrote', outputImageJs);
+const setScale = function (img){
+    return new Promise( function (resolve, reject) {
+        gm( inputImagePath ).size(function(err, size){
+            Scale = size.width >= size.height? size.width / ResizeTo : size.height / ResizeTo;
+            console.log("Size, scale: ", size, Scale );
+            resolve();
+        });
     });
-});
+};
 
+const resize = function (img) {
+    return new Promise( function (resolve, reject) {
+        gm( inputImagePath ).resize( ResizeTo ).write( outputImagePath, function (err) {
+            if (err) throw err;
+            console.log('Wrote', outputImagePath);
+            resolve();
+        });
+    });
+};
+
+const process = function (img) {
+    return new Promise( function (resolve, reject) {
+        getPixels( outputImagePath, 'image/png', function (err, px) {
+            if (err) throw err;
+            var map = processPixels(px);
+            fs.writeFileSync( outputImageJs, JSON.stringify( {
+                map: map,
+                scale: Scale,
+                note: "Divide "+inputImagePath+" by scale, "+Scale
+            } ));
+            console.log('Wrote', outputImageJs);
+            resolve();
+        });
+    });
+};
+
+
+console.log('Input', inputImagePath);
+var img = gm( inputImagePath );
+setScale(img).then( function (){
+    resize(img);
+}).then( function (){
+    process(img);
+});
